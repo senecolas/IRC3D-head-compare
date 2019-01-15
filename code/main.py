@@ -1,0 +1,91 @@
+import argparse
+import cv2
+import datasets
+import dlib
+from frame import *
+from hopenet import *
+import os
+import sys
+import timeit
+import torch
+import torch.backends.cudnn as cudnn
+import torchvision
+from torchvision import transforms
+import utils
+
+def parse_args():
+  """Parse input arguments."""
+  parser = argparse.ArgumentParser(description='Head pose estimation using the Hopenet network.')
+  parser.add_argument('--gpu', dest='gpu_id', help='GPU device id to use [0]',
+                      default=0, type=int)
+  parser.add_argument('--snapshot', dest='snapshot', help='Path of model snapshot.',
+                      default='', type=str)
+  parser.add_argument('--face_model', dest='face_model', help='Path of DLIB face detection model.',
+                      default='', type=str)
+  parser.add_argument('--video', dest='video_path', help='Path of video')
+  parser.add_argument('--output_string', dest='output_string', help='String appended to output file', default="")
+  parser.add_argument('--frame', dest='frame', help='The frame to calculate', type=int, default=1)
+  parser.add_argument('--conf_threshold', dest='conf_threshold', help='The face detection threshold', type=float, default=0.75)
+  args = parser.parse_args()
+  return args
+
+if __name__ == '__main__':
+  args = parse_args()
+
+  startTime = timeit.default_timer()
+  
+  print(torch.cuda.get_device_name(args.gpu_id))
+
+  cudnn.enabled = True
+
+  batch_size = 1
+  gpu = args.gpu_id
+  snapshot_path = args.snapshot
+  out_dir = '../output'
+  video_path = args.video_path
+
+  if not os.path.exists(out_dir):
+    os.makedirs(out_dir)
+
+  if not os.path.exists(args.video_path):
+    sys.exit('Video does not exist')
+
+  # ResNet50 structure
+  model = Hopenet(torchvision.models.resnet.Bottleneck, [3, 4, 6, 3], 66)
+
+  # Dlib face detection model
+  cnn_face_detector = dlib.cnn_face_detection_model_v1(args.face_model)
+
+  print ('Loading snapshot.')
+  # Load snapshot
+  saved_state_dict = torch.load(snapshot_path)
+  model.load_state_dict(saved_state_dict)
+
+  print ('Loading data.')
+
+  transformations = transforms.Compose([transforms.Scale(224),
+                                       transforms.CenterCrop(224), transforms.ToTensor(),
+                                       transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+
+  model.cuda(gpu)
+
+  print ('Ready to test network.')
+
+  # Test the Model
+  model.eval()  # Change model to 'eval' mode (BN uses moving mean/var).
+
+  video = cv2.VideoCapture(video_path)
+
+
+  print ("== Frame " + str(args.frame) + " == ")
+  video.set(1, args.frame - 1) #we go to the determined image on the video
+  
+  # read frame
+  visages = getFrameVisages(video, model, cnn_face_detector, transformations, args.conf_threshold, gpu)
+  for vis in visages:
+    print("VISAGE : ", float(vis.yaw), float(vis.pitch), float(vis.roll)) 
+  
+  video.release()
+  time = timeit.default_timer() - startTime
+  print("== THE END ==")
+  print('Time : ', time) 
