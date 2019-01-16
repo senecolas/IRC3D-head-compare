@@ -56,10 +56,12 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.isPlay = False
     
   def moveFrame(self, num):
-    ## TO DO
-    #actualFrame = int(self.video.get(cv2.cv.CV_CAP_PROP_POS_FRAMES))
-    #print(actualFrame)
-    #self.video.set(1, actualFrame + num)
+    self.isPlay = False
+    actualFrame = int(self.video.get(cv2.CAP_PROP_POS_FRAMES) - 1)
+    self.video.set(1, actualFrame + num)
+    self.ret, self.frame = self.video.read()
+    if (self.ret == True):
+      self.drawFrame()
   
   # Draw the actual frame on the screen
   def drawFrame(self):
