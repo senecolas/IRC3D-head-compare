@@ -14,7 +14,7 @@ class Visage():
     self.roll = roll
     
   def save(self, path):
-    txt_out = open(path + ".txt", 'w')
-    txt_out.write(' %f %f %f\n' % (self.yaw, self.pitch, self.roll))
-    print("Visage orientation save on", path + ".txt")
+    txt_out = open(path, 'w')
+    txt_out.write('%f %f %f\n' % (self.yaw, self.pitch, self.roll))
+    print("Visage orientation save on", path)
 

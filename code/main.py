@@ -17,6 +17,7 @@ import torch.backends.cudnn as cudnn
 import torchvision
 from torchvision import transforms
 from ui import main
+from visage import Visage
 import utils
 
 def parse_args():
@@ -29,7 +30,7 @@ def parse_args():
   parser.add_argument('--face_model', dest='face_model', help='Path of DLIB face detection model.',
                       default='', type=str)
   parser.add_argument('--video', dest='video_path', help='Path of video')
-  parser.add_argument('--output_string', dest='output_string', help='String appended to output file', default="")
+  parser.add_argument('--output', dest='output', help='Path and name to output file', default="../output/output.txt")
   parser.add_argument('--frame', dest='frame', help='The frame to calculate', type=int, default=1)
   parser.add_argument('--conf_threshold', dest='conf_threshold', help='The face detection threshold', type=float, default=0.75)
   args = parser.parse_args()
@@ -56,7 +57,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     visages = getFrameVisages(self.frame, self.hopenetModel, self.cnn_face_detector, self.transformations, self.conf_threshold, self.gpu_id)
     for vis in visages:
       print("VISAGE : ", float(vis.yaw), float(vis.pitch), float(vis.roll)) 
-      vis.save(self.ouput_path)
+      vis.save(self.output_path)
     
   def play(self):
     self.isPlay = True
@@ -149,7 +150,7 @@ if __name__ == '__main__':
   window.loadVideo(args.video_path);
   window.loadData(args.snapshot, args.face_model, args.gpu_id)
   window.conf_threshold = args.conf_threshold
-  window.output_path = args.output_string
+  window.output_path = args.output
 
   
   timer = QtCore.QTimer()
