@@ -11,6 +11,7 @@ from hopenet import *
 import os
 import sys
 import timeit
+import time
 import torch
 import torch.backends.cudnn as cudnn
 import torchvision
@@ -41,6 +42,8 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.setupUi(self)
     self.isPlay = False
     self.ret = True
+    self.videoFPS = 25
+    self.lastUpdate = 0
     self.read_PB.clicked.connect(lambda: self.play())
     self.pause_PB.clicked.connect(lambda: self.pause())
     self.nextFrame_PB.clicked.connect(lambda: self.moveFrame(1))
@@ -55,13 +58,24 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
   def pause(self):
     self.isPlay = False
     
+  def loadVideo(self, path):
+    if not os.path.exists(path):
+      sys.exit('Video does not exist')
+    self.video = cv2.VideoCapture(args.video_path)
+    self.videoFPS = int(self.video.get(cv2.CAP_PROP_FPS))
+    
   def moveFrame(self, num):
     self.isPlay = False
     actualFrame = int(self.video.get(cv2.CAP_PROP_POS_FRAMES) - 1)
     self.video.set(1, actualFrame + num)
+    self.drawNextFrame()
+  
+  def drawNextFrame(self):
     self.ret, self.frame = self.video.read()
     if (self.ret == True):
       self.drawFrame()
+    else:
+      self.isPlay = False
   
   # Draw the actual frame on the screen
   def drawFrame(self):
@@ -74,12 +88,19 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.VideoWidget.setPixmap(resizeImage)
 
   def update(self):
+    
+    # PLAY THE VIDEO
     if(self.isPlay):
-      self.ret, self.frame = self.video.read()
-      if (self.ret == True):
-        self.drawFrame()
-      else:
-        self.isPlay = False
+      
+      self.drawNextFrame()
+      
+      # FPS CONTROLLER
+      elapsedTime = timeit.default_timer() - self.lastUpdate
+      if (elapsedTime < 1. / self.videoFPS) : 
+        time.sleep(1. / self.videoFPS - elapsedTime)
+
+
+    self.lastUpdate = timeit.default_timer()
 
 
 if __name__ == '__main__':
@@ -89,11 +110,11 @@ if __name__ == '__main__':
   window = MainWindow()
   window.show()
   
-  window.video = cv2.VideoCapture(args.video_path);
+  window.loadVideo(args.video_path);
   
   timer = QtCore.QTimer()
   timer.timeout.connect(window.update)
-  timer.start(50)  # every 10,000 milliseconds
+  timer.start(10)
 
   sys.exit(app.exec_())
       
