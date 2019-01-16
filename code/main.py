@@ -45,6 +45,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.videoFPS = 25
     self.lastUpdate = 0
     self.conf_threshold = 0.75
+    self.output_path = "output.txt"
     self.read_PB.clicked.connect(lambda: self.play())
     self.pause_PB.clicked.connect(lambda: self.pause())
     self.nextFrame_PB.clicked.connect(lambda: self.moveFrame(1))
@@ -55,6 +56,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     visages = getFrameVisages(self.frame, self.hopenetModel, self.cnn_face_detector, self.transformations, self.conf_threshold, self.gpu_id)
     for vis in visages:
       print("VISAGE : ", float(vis.yaw), float(vis.pitch), float(vis.roll)) 
+      vis.save(self.ouput_path)
     
   def play(self):
     self.isPlay = True
@@ -147,6 +149,7 @@ if __name__ == '__main__':
   window.loadVideo(args.video_path);
   window.loadData(args.snapshot, args.face_model, args.gpu_id)
   window.conf_threshold = args.conf_threshold
+  window.output_path = args.output_string
 
   
   timer = QtCore.QTimer()
