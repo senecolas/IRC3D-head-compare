@@ -1,5 +1,6 @@
 from PyQt5 import QtCore
 from PyQt5 import QtGui
+from PyQt5.QtGui import QPixmap
 from PyQt5 import QtWidgets
 import argparse
 import cv2
@@ -38,6 +39,18 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
   def __init__(self, parent=None):
     super(MainWindow, self).__init__(parent=parent)
     self.setupUi(self)
+    self.play = False
+  
+  # Draw the actual frame on the screen
+  def drawFrame(self, frame):
+    rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    convertToQtFormat = QtGui.QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0], QtGui.QImage.Format_RGB888)
+    convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
+    pixmap = QPixmap(convertToQtFormat)
+    resizeImage = pixmap.scaled(661, 351, QtCore.Qt.KeepAspectRatio)
+    #QApplication.processEvents()
+    self.VideoWidget.setPixmap(resizeImage)
+
 
 
 if __name__ == '__main__':
@@ -46,8 +59,34 @@ if __name__ == '__main__':
   app = QtWidgets.QApplication(sys.argv)
   window = MainWindow()
   window.show()
-  sys.exit(app.exec_())
   
+  window.video = cv2.VideoCapture(args.video_path);
+ 
+  
+  cap = cv2.VideoCapture(args.video_path)
+ 
+  # Check if camera opened successfully
+  if (cap.isOpened() == False): 
+    print("Error opening video stream or file")
+
+  # Read until video is completed
+  while(cap.isOpened()):
+    # Capture frame-by-frame
+    ret, frame = cap.read()
+    if ret == True:
+
+      # Display the resulting frame
+      window.drawFrame(frame)
+
+      # Press Q on keyboard to  exit
+      if cv2.waitKey(25) & 0xFF == ord('q'):
+        break
+
+    # Break the loop
+    else: 
+      break
+      
+  sys.exit(app.exec_())
   
   comment = """
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'MainWindow.ui'
+# Form implementation generated from reading ui file 'main.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
 #
@@ -17,10 +17,14 @@ class Ui_MainWindow(object):
         self.MainWindows.setMaximumSize(QtCore.QSize(662, 16777215))
         self.MainWindows.setObjectName("MainWindows")
         self.frame = QtWidgets.QFrame(self.MainWindows)
-        self.frame.setGeometry(QtCore.QRect(0, 0, 661, 351))
+        self.frame.setGeometry(QtCore.QRect(0, 0, 659, 349))
         self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame.setObjectName("frame")
+        self.VideoWidget = QtWidgets.QLabel(self.frame)
+        self.VideoWidget.setGeometry(QtCore.QRect(0, 0, 661, 351))
+        self.VideoWidget.setText("")
+        self.VideoWidget.setObjectName("VideoWidget")
         self.layoutWidget = QtWidgets.QWidget(self.MainWindows)
         self.layoutWidget.setGeometry(QtCore.QRect(60, 370, 541, 61))
         self.layoutWidget.setObjectName("layoutWidget")
