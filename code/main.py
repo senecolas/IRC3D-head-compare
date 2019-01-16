@@ -1,3 +1,6 @@
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 import argparse
 import cv2
 import datasets
@@ -11,6 +14,7 @@ import torch
 import torch.backends.cudnn as cudnn
 import torchvision
 from torchvision import transforms
+from ui import main
 import utils
 
 def parse_args():
@@ -29,8 +33,23 @@ def parse_args():
   args = parser.parse_args()
   return args
 
+
+class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
+  def __init__(self, parent=None):
+    super(MainWindow, self).__init__(parent=parent)
+    self.setupUi(self)
+
+
 if __name__ == '__main__':
   args = parse_args()
+  
+  app = QtWidgets.QApplication(sys.argv)
+  window = MainWindow()
+  window.show()
+  sys.exit(app.exec_())
+  
+  
+  comment = """
 
   startTime = timeit.default_timer()
   
@@ -88,4 +107,4 @@ if __name__ == '__main__':
   video.release()
   time = timeit.default_timer() - startTime
   print("== THE END ==")
-  print('Time : ', time) 
+  print('Time : ', time) """

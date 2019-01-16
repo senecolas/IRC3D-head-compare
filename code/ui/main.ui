@@ -42,7 +42,7 @@
      <enum>QFrame::Raised</enum>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>60</x>
@@ -62,35 +62,35 @@
      <item>
       <layout class="QHBoxLayout" name="buttons">
        <item>
-        <widget class="QPushButton" name="lastFrame">
+        <widget class="QPushButton" name="lastFrame_PB">
          <property name="text">
           <string>Last Frame</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="read">
+        <widget class="QPushButton" name="read_PB">
          <property name="text">
           <string>Lecture</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="headPosition">
+        <widget class="QPushButton" name="headPosition_PB">
          <property name="text">
           <string>Get head position</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pause">
+        <widget class="QPushButton" name="pause_PB">
          <property name="text">
           <string>Pause</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="nextFrame">
+        <widget class="QPushButton" name="nextFrame_PB">
          <property name="text">
           <string>Next Frame</string>
          </property>
@@ -100,14 +100,8 @@
      </item>
     </layout>
    </widget>
-   <zorder>read</zorder>
-   <zorder>nextFrame</zorder>
-   <zorder>headPosition</zorder>
-   <zorder>lastFrame</zorder>
-   <zorder>pause</zorder>
+   <zorder>layoutWidget</zorder>
    <zorder>frame</zorder>
-   <zorder>slider</zorder>
-   <zorder>verticalLayoutWidget</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QMenuBar" name="menubar">
