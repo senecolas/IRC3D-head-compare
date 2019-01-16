@@ -13,21 +13,14 @@ from torchvision import transforms
 # All frame functions
 
 # Get the actual frame data
-#   video = the cv2 video on the actual frame
+#   frame = the cv2 frame
 #   model = hopenet load model
 #   cnn_face_detector = Dlib face detection model
 #   conf_threshold = The face detection threshold
 #   gpu = the gpu id
-def getFrameVisages(video, model, cnn_face_detector, transformations, conf_threshold, gpu):
+def getFrameVisages(frame, model, cnn_face_detector, transformations, conf_threshold, gpu):
   # Result data
   res = [];
-
-  # We read the video
-  ret, frame = video.read()
-  
-  # if the video is finished
-  if ret == False:
-    return res
 
   # We read the frame
   cv2_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
