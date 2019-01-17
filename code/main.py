@@ -38,6 +38,8 @@ def parse_args():
   args = parser.parse_args()
   return args
 
+def clamp(minvalue, value, maxvalue):
+    return max(minvalue, min(value, maxvalue))
 
 class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
   def __init__(self, parent=None):
@@ -49,6 +51,9 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.videoFPS = 25
     self.lastUpdate = 0
     self.conf_threshold = 0.75
+    self.maxWidth = 661
+    self.maxHeight = 351
+    self.zoom = 1.
     self.output_path = "output.txt"
     self.read_PB.clicked.connect(lambda: self.play())
     self.pause_PB.clicked.connect(lambda: self.pause())
@@ -56,6 +61,16 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.lastFrame_PB.clicked.connect(lambda: self.moveFrame(-1))
     self.headPosition_PB.clicked.connect(lambda: self.getHeadPosition())
     self.actionOpen_video.triggered.connect(self.selectVideo)
+    self.VideoWidget.wheelEvent = self.wheelEvent
+    self.frame.mousePressEvent = self.mousePressEvent
+    
+  def mousePressEvent(self, event):
+    print("clicked", event.pos())
+    
+  def wheelEvent(self, event):
+    self.zoom = clamp(1., self.zoom + event.angleDelta().y() * 0.002, 20.)
+    self.drawFrame() #we redraw the frame
+    print("zoom", self.zoom)
   
   def getHeadPosition(self):
     if(self.isVideoLoaded == False):
@@ -114,7 +129,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     convertToQtFormat = QtGui.QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0], QtGui.QImage.Format_RGB888)
     convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
     pixmap = QPixmap(convertToQtFormat)
-    resizeImage = pixmap.scaled(661, 351, QtCore.Qt.KeepAspectRatio)
+    resizeImage = pixmap.scaled(self.maxWidth * self.zoom, self.maxHeight * self.zoom, QtCore.Qt.KeepAspectRatio)
     #QApplication.processEvents()
     self.VideoWidget.setPixmap(resizeImage)
 
