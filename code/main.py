@@ -1,7 +1,6 @@
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-from PyQt5.QtGui import QPixmap
 import argparse
 import cv2
 import datasets
@@ -36,9 +35,6 @@ def parse_args():
   args = parser.parse_args()
   return args
 
-def clamp(minvalue, value, maxvalue):
-    return max(minvalue, min(value, maxvalue))
-
 class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
   def __init__(self, parent=None):
     super(MainWindow, self).__init__(parent=parent)
@@ -49,8 +45,10 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.videoFPS = 25
     self.lastUpdate = 0
     self.conf_threshold = 0.75
-    self.maxWidth = 661
-    self.maxHeight = 351
+    self.maxWidth = self.VideoWidget.geometry().width()
+    self.maxHeight = self.VideoWidget.geometry().height()
+    self.centerX = self.maxWidth /2. # center of the video
+    self.centerY = self.maxHeight /2.
     self.zoom = 1.
     self.output_path = "output.txt"
     self.read_PB.clicked.connect(lambda: self.play())
@@ -59,16 +57,21 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.lastFrame_PB.clicked.connect(lambda: self.moveFrame(-1))
     self.headPosition_PB.clicked.connect(lambda: self.getHeadPosition())
     self.actionOpen_video.triggered.connect(self.selectVideo)
-    self.VideoWidget.wheelEvent = self.wheelEvent
+    self.frame.wheelEvent = self.wheelEvent
     self.frame.mousePressEvent = self.mousePressEvent
     
   def mousePressEvent(self, event):
     print("clicked", event.pos())
     
   def wheelEvent(self, event):
-    self.zoom = clamp(1., self.zoom + event.angleDelta().y() * 0.002, 20.)
+    self.zoom = utils.clamp(1., self.zoom + event.angleDelta().y() * 0.002, 20.)
+    if(self.zoom == 1):
+      self.centerX = self.maxWidth /2. # center of the video
+      self.centerY = self.maxHeight /2.
+    else:
+      self.centerX = event.pos().x()
+      self.centerY = event.pos().y()
     self.drawFrame() #we redraw the frame
-    print("zoom", self.zoom)
   
   def getHeadPosition(self):
     if(self.isVideoLoaded == False):
@@ -113,8 +116,9 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
   def drawNextFrame(self):
     if(self.isVideoLoaded == False):
       return
-    self.ret, self.frame = self.video.read()
+    self.ret, frame = self.video.read()
     if (self.ret == True):
+      self.frame = frame
       self.drawFrame()
     else:
       self.isPlay = False
@@ -123,13 +127,43 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
   def drawFrame(self):
     if(self.isVideoLoaded == False):
       return
+    
+    # convert cv2 video to QPixmap
     rgbImage = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
     convertToQtFormat = QtGui.QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0], QtGui.QImage.Format_RGB888)
     convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
-    pixmap = QPixmap(convertToQtFormat)
-    resizeImage = pixmap.scaled(self.maxWidth * self.zoom, self.maxHeight * self.zoom, QtCore.Qt.KeepAspectRatio)
-    #QApplication.processEvents()
-    self.VideoWidget.setPixmap(resizeImage)
+    pixmap = QtGui.QPixmap(convertToQtFormat)
+    
+    # Resize
+    pixmap = pixmap.scaled(self.maxWidth, self.maxHeight, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+    
+    # Crop
+    halfX = pixmap.width() / (2. * self.zoom)
+    halfY = pixmap.width() / (2. * self.zoom)
+    xMin = int((self.centerX - halfX))
+    yMin = int((self.centerY - halfY))
+    xMax = int((self.centerX + halfX))
+    yMax = int((self.centerY + halfY))
+    if(xMin < 0):
+      xMax -= xMin
+    if(yMin < 0):
+      yMax -= yMin
+    cropRect = QtCore.QRect(utils.clamp(0, xMin, halfX), 
+                            utils.clamp(0, yMin, halfY), 
+                            xMax, 
+                            yMax)
+    pixmap = pixmap.copy(cropRect)
+    
+    print(cropRect)
+    
+    # Resize with zoom
+    pixmap = pixmap.scaled(self.maxWidth * self.zoom, self.maxHeight * self.zoom, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+    
+    # placed with centered position
+    #self.VideoWidget.resize(self.maxWidth * self.zoom, self.maxHeight * self.zoom);
+    #self.VideoWidget.move((self.centerX - resizeImage.width() / 2), (self.centerY - resizeImage.height() / 2.))
+    #print(self.centerX - resizeImage.width() / (2. * self.zoom), " - ", self.centerY - resizeImage.height() / (2.))
+    self.VideoWidget.setPixmap(pixmap)
 
   def update(self):
     # PLAY THE VIDEO
@@ -183,7 +217,7 @@ if __name__ == '__main__':
   
   if(args.video_path != ""): 
     window.loadVideo(args.video_path);
-  window.loadData(args.snapshot, args.face_model, args.gpu_id)
+  #window.loadData(args.snapshot, args.face_model, args.gpu_id)
   window.conf_threshold = args.conf_threshold
   window.output_path = args.output
 

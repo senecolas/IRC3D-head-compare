@@ -7,6 +7,10 @@ import cv2
 import math
 from math import cos, sin
 
+
+def clamp(minvalue, value, maxvalue):
+  return max(minvalue, min(value, maxvalue))
+
 def softmax_temperature(tensor, temperature):
     result = torch.exp(tensor / temperature)
     result = torch.div(result, torch.sum(result, 1).unsqueeze(1).expand_as(result))
