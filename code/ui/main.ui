@@ -126,7 +126,19 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen_video"/>
+   </widget>
+   <addaction name="menuFile"/>
   </widget>
+  <action name="actionOpen_video">
+   <property name="text">
+    <string>Open video...</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

@@ -62,7 +62,13 @@ class Ui_MainWindow(object):
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 662, 21))
         self.menubar.setObjectName("menubar")
+        self.menuFile = QtWidgets.QMenu(self.menubar)
+        self.menuFile.setObjectName("menuFile")
         MainWindow.setMenuBar(self.menubar)
+        self.actionOpen_video = QtWidgets.QAction(MainWindow)
+        self.actionOpen_video.setObjectName("actionOpen_video")
+        self.menuFile.addAction(self.actionOpen_video)
+        self.menubar.addAction(self.menuFile.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -75,4 +81,6 @@ class Ui_MainWindow(object):
         self.headPosition_PB.setText(_translate("MainWindow", "Get head position"))
         self.pause_PB.setText(_translate("MainWindow", "Pause"))
         self.nextFrame_PB.setText(_translate("MainWindow", "Next Frame"))
+        self.menuFile.setTitle(_translate("MainWindow", "File"))
+        self.actionOpen_video.setText(_translate("MainWindow", "Open video..."))
 

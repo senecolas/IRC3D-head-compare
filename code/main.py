@@ -17,8 +17,8 @@ import torch.backends.cudnn as cudnn
 import torchvision
 from torchvision import transforms
 from ui import main
-from visage import Visage
 import utils
+from visage import Visage
 
 def parse_args():
   """Parse input arguments."""
@@ -29,7 +29,7 @@ def parse_args():
                       default='', type=str)
   parser.add_argument('--face_model', dest='face_model', help='Path of DLIB face detection model.',
                       default='', type=str)
-  parser.add_argument('--video', dest='video_path', help='Path of video')
+  parser.add_argument('--video', dest='video_path', help='Path of video', default='')
   parser.add_argument('--output', dest='output', help='Path and name to output file', default="../output/output.txt")
   parser.add_argument('--frame', dest='frame', help='The frame to calculate', type=int, default=1)
   parser.add_argument('--conf_threshold', dest='conf_threshold', help='The face detection threshold', type=float, default=0.75)
@@ -42,6 +42,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     super(MainWindow, self).__init__(parent=parent)
     self.setupUi(self)
     self.isPlay = False
+    self.isVideoLoaded = False
     self.ret = True
     self.videoFPS = 25
     self.lastUpdate = 0
@@ -52,14 +53,19 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.nextFrame_PB.clicked.connect(lambda: self.moveFrame(1))
     self.lastFrame_PB.clicked.connect(lambda: self.moveFrame(-1))
     self.headPosition_PB.clicked.connect(lambda: self.getHeadPosition())
-    
+    self.actionOpen_video.triggered.connect(self.selectVideo)
+  
   def getHeadPosition(self):
+    if(self.isVideoLoaded == False):
+      return
     visages = getFrameVisages(self.frame, self.hopenetModel, self.cnn_face_detector, self.transformations, self.conf_threshold, self.gpu_id)
     for vis in visages:
       print("VISAGE : ", float(vis.yaw), float(vis.pitch), float(vis.roll)) 
       vis.save(self.output_path)
     
   def play(self):
+    if(self.isVideoLoaded == False):
+      return
     self.isPlay = True
     #if the video is end, we restart
     if(self.ret == False):
@@ -68,19 +74,30 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
   def pause(self):
     self.isPlay = False
     
-  def loadVideo(self, path):
-    if not os.path.exists(path):
-      sys.exit('Video does not exist')
-    self.video = cv2.VideoCapture(args.video_path)
+  def selectVideo(self):
+    fileName = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Video')[0]
+    self.loadVideo(str(fileName))
+    
+  def loadVideo(self, fileName):
+    self.video = cv2.VideoCapture(fileName)
+    if(not self.video.isOpened()):
+      print("ERROR : Can't load", fileName)
+      return 
     self.videoFPS = int(self.video.get(cv2.CAP_PROP_FPS))
+    self.isVideoLoaded = True
+    self.drawNextFrame() # we draw the first frame
     
   def moveFrame(self, num):
+    if(self.isVideoLoaded == False):
+      return
     self.isPlay = False
     actualFrame = int(self.video.get(cv2.CAP_PROP_POS_FRAMES) - 1)
     self.video.set(1, actualFrame + num)
     self.drawNextFrame()
   
   def drawNextFrame(self):
+    if(self.isVideoLoaded == False):
+      return
     self.ret, self.frame = self.video.read()
     if (self.ret == True):
       self.drawFrame()
@@ -89,6 +106,8 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
   
   # Draw the actual frame on the screen
   def drawFrame(self):
+    if(self.isVideoLoaded == False):
+      return
     rgbImage = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
     convertToQtFormat = QtGui.QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0], QtGui.QImage.Format_RGB888)
     convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
@@ -147,7 +166,8 @@ if __name__ == '__main__':
   window = MainWindow()
   window.show()
   
-  window.loadVideo(args.video_path);
+  if(args.video_path != ""): 
+    window.loadVideo(args.video_path);
   window.loadData(args.snapshot, args.face_model, args.gpu_id)
   window.conf_threshold = args.conf_threshold
   window.output_path = args.output
@@ -158,4 +178,3 @@ if __name__ == '__main__':
   timer.start(10)
 
   sys.exit(app.exec_())
-
