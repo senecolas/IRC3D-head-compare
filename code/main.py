@@ -20,7 +20,7 @@ from ui import main
 import utils
 from visage import Visage
 
-# python3 code/main.py --snapshot ./models/hopenet_robust_alpha1.pkl --face_model ./models/mmod_human_face_detector.dat --video ./videos/CCTV_1.mp4 --frame 59 --conf_threshold 0.2
+# python3 code/main.py --snapshot ./models/hopenet_robust_alpha1.pkl --face_model ./models/mmod_human_face_detector.dat --video ./videos/CCTV_1.mp4 --conf_threshold 0.8 --output ./output/output.txt
 
 def parse_args():
   """Parse input arguments."""

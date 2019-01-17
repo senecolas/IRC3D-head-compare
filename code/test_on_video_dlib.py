@@ -46,7 +46,7 @@ if __name__ == '__main__':
   batch_size = 1
   gpu = args.gpu_id
   snapshot_path = args.snapshot
-  out_dir = '../output'
+  out_dir = './output'
   video_path = args.video_path
 
   if not os.path.exists(out_dir):
