@@ -1,11 +1,13 @@
 # Ignored IDE files
 nbproject/*
 
-# Ignored videos and tests files
+# Ignored videos and tests and output files
 videos/*
 video/*
 test/*
 tests/*
+output/*
+outputs/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

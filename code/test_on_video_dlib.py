@@ -26,7 +26,7 @@ def parse_args():
   parser.add_argument('--face_model', dest='face_model', help='Path of DLIB face detection model.',
                       default='', type=str)
   parser.add_argument('--video', dest='video_path', help='Path of video')
-  parser.add_argument('--output_string', dest='output_string', help='String appended to output file')
+  parser.add_argument('--output_string', dest='output_string', help='String appended to output file', default='output')
   parser.add_argument('--n_frames', dest='n_frames', help='Number of frames', type=int)
   parser.add_argument('--fps', dest='fps', help='Frames per second of source video', type=float, default=30.)
   parser.add_argument('--conf_threshold', dest='conf_threshold', help='The face detection threshold', type=float, default=0.75)
@@ -46,7 +46,7 @@ if __name__ == '__main__':
   batch_size = 1
   gpu = args.gpu_id
   snapshot_path = args.snapshot
-  out_dir = '../output'
+  out_dir = './output'
   video_path = args.video_path
 
   if not os.path.exists(out_dir):
@@ -193,3 +193,5 @@ if __name__ == '__main__':
   txt_out_info.write('Frame with visage = %d/%d\n' % (visageNumber, args.n_frames))
   txt_out_info.write('Time = %f for %d frames\n' % (time, args.n_frames))
   print('Time : ', time) 
+
+# python3 code/test_on_video_dlib.py --snapshot ./models/hopenet_robust_alpha1.pkl --face_model ./models/mmod_human_face_detector.dat --video ./videos/CCTV_1.mp4 --n_frames 150 --fps 30 --conf_threshold 0.05
