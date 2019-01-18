@@ -46,6 +46,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.isVideoLoaded = False
     self.ret = True
     self.videoFPS = 25
+    self.isDragging = False
     self.lastUpdate = 0
     self.conf_threshold = 0.75
     self.maxWidth = self.VideoWidget.geometry().width()
@@ -53,6 +54,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.centerX = self.maxWidth / 2. # center of the video
     self.centerY = self.maxHeight / 2.
     self.zoom = 1.
+    self.mousePos = QtCore.QPointF(0, 0)
     self.output_path = "output.txt"
     self.read_PB.clicked.connect(lambda: self.play())
     self.pause_PB.clicked.connect(lambda: self.pause())
@@ -61,10 +63,23 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.headPosition_PB.clicked.connect(lambda: self.getHeadPosition())
     self.actionOpen_video.triggered.connect(self.selectVideo)
     self.VideoWidget.wheelEvent = self.wheelEvent
-    self.frame.mousePressEvent = self.mousePressEvent
+    self.VideoWidget.mousePressEvent = self.mousePressEvent
+    self.VideoWidget.mouseReleaseEvent = self.mouseReleaseEvent
+    self.VideoWidget.mouseMoveEvent = self.mouseMoveEvent
     
   def mousePressEvent(self, event):
-    print("clicked", event.pos())
+    self.mousePos = event.pos()
+    self.isDragging = True
+  
+  def mouseReleaseEvent(self, event):
+    self.isDragging = False
+    
+  def mouseMoveEvent(self, event):
+    if (self.isDragging):
+      self.centerX -= (event.pos().x() - self.mousePos.x()) 
+      self.centerY -= (event.pos().y() - self.mousePos.y())
+      self.drawFrame() #we redraw the frame
+    self.mousePos = event.pos()
     
   def wheelEvent(self, event):
     self.zoom = utils.clamp(1., self.zoom + event.angleDelta().y() * 0.002, 20.)
@@ -205,7 +220,7 @@ if __name__ == '__main__':
   
   if(args.video_path != ""): 
     window.loadVideo(args.video_path);
-  window.loadData(args.snapshot, args.face_model, args.gpu_id)
+  #window.loadData(args.snapshot, args.face_model, args.gpu_id)
   window.conf_threshold = args.conf_threshold
   window.output_path = args.output
 
