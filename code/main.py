@@ -200,7 +200,7 @@ if __name__ == '__main__':
   
   if(args.video_path != ""): 
     window.loadVideo(args.video_path);
-  #window.loadData(args.snapshot, args.face_model, args.gpu_id)
+  window.loadData(args.snapshot, args.face_model, args.gpu_id)
   window.conf_threshold = args.conf_threshold
   window.output_path = args.output
 
