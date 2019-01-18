@@ -11,9 +11,9 @@ class Visage():
     self.x_max = x_max
     self.y_min = y_min
     self.y_max = y_max
-    self.yaw = yaw
-    self.pitch = pitch
-    self.roll = roll
+    self.yaw = float(yaw)
+    self.pitch = float(pitch)
+    self.roll = float(roll)
   
   # save on a txt file by overwriting the file (for blender test)
   def save(self, path):
@@ -24,6 +24,7 @@ class Visage():
   
   def getJSONData(self):
     return {
+      "confidence": self.confidence,
       "position": {
         "x_min": self.x_min,
         "x_max": self.x_max,

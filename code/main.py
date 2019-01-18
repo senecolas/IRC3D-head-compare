@@ -93,14 +93,22 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
       self.centerX = event.pos().x() * self.zoom
       self.centerY = event.pos().y() * self.zoom
     self.drawFrame() #we redraw the frame
+    
+  def getActualCacheData(self):
+    return self.cacheData['data'][int(self.actualFrame - 1)]
   
   def getHeadPosition(self):
     if(self.isVideoLoaded == False or self.isLoadedData == False):
       return
+    if(self.getActualCacheData()['isLoaded']):
+      print("Face already loaded")
+      return
     visages = getFrameVisages(self.frame, self.hopenetModel, self.cnn_face_detector, self.transformations, self.conf_threshold, self.gpu_id)
     for vis in visages:
-      print("VISAGE : ", float(vis.yaw), float(vis.pitch), float(vis.roll)) 
+      self.getActualCacheData()['faces'].append(vis.getJSONData())
       vis.save(self.output_path)
+    self.getActualCacheData()['isLoaded'] = True
+    self.saveCacheFile()
     
   def play(self):
     if(self.isVideoLoaded == False):
@@ -213,12 +221,12 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     else:
       with open(self.cachePath) as json_cacheFile:
         self.cacheData = json.load(json_cacheFile)
-        print(self.cacheData)
     
   def initCacheFile(self):
     self.cacheData = {"data": []}
     for i in range(int(self.frameCount)):
-      self.cacheData["data"].append({"isLoaded": False})
+      self.cacheData["data"].append({"isLoaded": False,
+                                    "faces": []})
     self.saveCacheFile()
       
   def saveCacheFile(self):
