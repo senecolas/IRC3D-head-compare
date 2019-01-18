@@ -42,7 +42,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
   def __init__(self, parent=None):
     super(MainWindow, self).__init__(parent=parent)
     self.setupUi(self)
-    self.isPlay = False
+    self.isPlaying = False
     self.isVideoLoaded = False
     self.ret = True
     self.videoFPS = 25
@@ -102,13 +102,13 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
   def play(self):
     if(self.isVideoLoaded == False):
       return
-    self.isPlay = True
+    self.isPlaying = True
     #if the video is end, we restart
     if(self.ret == False):
       self.video.set(1, 0)
       
   def pause(self):
-    self.isPlay = False
+    self.isPlaying = False
     
   def selectVideo(self):
     fileName = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Video')[0]
@@ -121,14 +121,19 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
       return 
     self.videoFPS = int(self.video.get(cv2.CAP_PROP_FPS))
     self.isVideoLoaded = True
-    self.drawNextFrame() # we draw the first frame
+    self.setFrame(0) # we draw the first frame
     
   def moveFrame(self, num):
     if(self.isVideoLoaded == False):
       return
-    self.isPlay = False
+    self.isPlaying = False
     actualFrame = int(self.video.get(cv2.CAP_PROP_POS_FRAMES) - 1)
-    self.video.set(1, actualFrame + num)
+    self.setFrame(actualFrame + num)
+    
+  def setFrame(self, frameNum):
+    if(self.isVideoLoaded == False):
+      return
+    self.video.set(1, frameNum)
     self.drawNextFrame()
   
   def drawNextFrame(self):
@@ -139,7 +144,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
       self.frame = frame
       self.drawFrame()
     else:
-      self.isPlay = False
+      self.isPlaying = False
   
   # Draw the actual frame on the screen
   def drawFrame(self):
@@ -166,7 +171,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
 
   def update(self):
     # PLAY THE VIDEO
-    if(self.isPlay):
+    if(self.isPlaying):
       self.drawNextFrame()
       
       # FPS CONTROLLER
@@ -220,7 +225,7 @@ if __name__ == '__main__':
   
   if(args.video_path != ""): 
     window.loadVideo(args.video_path);
-  #window.loadData(args.snapshot, args.face_model, args.gpu_id)
+  window.loadData(args.snapshot, args.face_model, args.gpu_id)
   window.conf_threshold = args.conf_threshold
   window.output_path = args.output
 
