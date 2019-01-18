@@ -49,8 +49,8 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.conf_threshold = 0.75
     self.maxWidth = self.VideoWidget.geometry().width()
     self.maxHeight = self.VideoWidget.geometry().height()
-    self.centerX = self.maxWidth /2. # center of the video
-    self.centerY = self.maxHeight /2.
+    self.centerX = self.maxWidth / 2. # center of the video
+    self.centerY = self.maxHeight / 2.
     self.zoom = 1.
     self.output_path = "output.txt"
     self.read_PB.clicked.connect(lambda: self.play())
@@ -59,7 +59,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.lastFrame_PB.clicked.connect(lambda: self.moveFrame(-1))
     self.headPosition_PB.clicked.connect(lambda: self.getHeadPosition())
     self.actionOpen_video.triggered.connect(self.selectVideo)
-    self.frame.wheelEvent = self.wheelEvent
+    self.VideoWidget.wheelEvent = self.wheelEvent
     self.frame.mousePressEvent = self.mousePressEvent
     
   def mousePressEvent(self, event):
@@ -68,11 +68,11 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
   def wheelEvent(self, event):
     self.zoom = utils.clamp(1., self.zoom + event.angleDelta().y() * 0.002, 20.)
     if(self.zoom == 1):
-      self.centerX = self.maxWidth /2. # center of the video
-      self.centerY = self.maxHeight /2.
+      self.centerX = self.maxWidth / 2. # center of the video
+      self.centerY = self.maxHeight / 2.
     else:
-      self.centerX = event.pos().x()
-      self.centerY = event.pos().y()
+      self.centerX = event.pos().x() * self.zoom
+      self.centerY = event.pos().y() * self.zoom
     self.drawFrame() #we redraw the frame
   
   def getHeadPosition(self):
@@ -136,36 +136,17 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
     pixmap = QtGui.QPixmap(convertToQtFormat)
     
-    # Resize
-    pixmap = pixmap.scaled(self.maxWidth, self.maxHeight, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
-    
-    # Crop
-    halfX = pixmap.width() / (2. * self.zoom)
-    halfY = pixmap.width() / (2. * self.zoom)
-    xMin = int((self.centerX - halfX))
-    yMin = int((self.centerY - halfY))
-    xMax = int((self.centerX + halfX))
-    yMax = int((self.centerY + halfY))
-    if(xMin < 0):
-      xMax -= xMin
-    if(yMin < 0):
-      yMax -= yMin
-    cropRect = QtCore.QRect(utils.clamp(0, xMin, halfX), 
-                            utils.clamp(0, yMin, halfY), 
-                            xMax, 
-                            yMax)
-    pixmap = pixmap.copy(cropRect)
-    
-    print(cropRect)
-    
     # Resize with zoom
     pixmap = pixmap.scaled(self.maxWidth * self.zoom, self.maxHeight * self.zoom, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
     
-    # placed with centered position
-    #self.VideoWidget.resize(self.maxWidth * self.zoom, self.maxHeight * self.zoom);
-    #self.VideoWidget.move((self.centerX - resizeImage.width() / 2), (self.centerY - resizeImage.height() / 2.))
-    #print(self.centerX - resizeImage.width() / (2. * self.zoom), " - ", self.centerY - resizeImage.height() / (2.))
-    self.VideoWidget.setPixmap(pixmap)
+    # Add image
+    scene = QtWidgets.QGraphicsScene() 
+    scene.addItem(QtWidgets.QGraphicsPixmapItem(pixmap))
+    self.VideoWidget.setScene(scene) 
+    
+    #Center on the appropriate position
+    self.VideoWidget.centerOn(self.centerX, self.centerY)
+    
 
   def update(self):
     # PLAY THE VIDEO

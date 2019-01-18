@@ -41,7 +41,7 @@
     <property name="frameShadow">
      <enum>QFrame::Raised</enum>
     </property>
-    <widget class="QLabel" name="VideoWidget">
+    <widget class="QLabel" name="VideoWidget_old">
      <property name="geometry">
       <rect>
        <x>0</x>
@@ -52,6 +52,40 @@
      </property>
      <property name="text">
       <string/>
+     </property>
+    </widget>
+    <widget class="QGraphicsView" name="VideoWidget">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>661</width>
+       <height>351</height>
+      </rect>
+     </property>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="backgroundBrush">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </property>
+     <property name="dragMode">
+      <enum>QGraphicsView::NoDrag</enum>
+     </property>
+     <property name="cacheMode">
+      <set>QGraphicsView::CacheNone</set>
+     </property>
+     <property name="resizeAnchor">
+      <enum>QGraphicsView::AnchorViewCenter</enum>
      </property>
     </widget>
    </widget>
