@@ -28,7 +28,7 @@ def getFrameVisages(frame, model, cnn_face_detector, transformations, conf_thres
   # Dlib visage detection
   startDLIB = timeit.default_timer()
   print("-- Dlib Face detector")
-  dets = cnn_face_detector(cv2_frame, 1)
+  dets = cnn_face_detector(cv2_frame, gpu)
   print("   Time : " + str(timeit.default_timer() - startDLIB))
   
   # we calculate tensor

@@ -5,6 +5,7 @@ import argparse
 import cv2
 import datasets
 import dlib
+import dlib.cuda as cuda
 from frame import *
 from hopenet import *
 import os
@@ -165,7 +166,11 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     
     # ResNet50 structure
     self.hopenetModel = Hopenet(torchvision.models.resnet.Bottleneck, [3, 4, 6, 3], 66)
-    
+
+    self.gpu_id = gpu_id
+
+    dlib.DLIB_USE_CUDA = 1
+
     # Dlib face detection model
     self.cnn_face_detector = dlib.cnn_face_detection_model_v1(face_model)
 
@@ -180,7 +185,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
                                               transforms.CenterCrop(224), transforms.ToTensor(),
                                               transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
 
-    self.gpu_id = gpu_id
+    
     self.hopenetModel.cuda(self.gpu_id)
 
     print ('Ready to test network.')
