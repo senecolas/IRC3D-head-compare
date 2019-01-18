@@ -8,6 +8,7 @@ import dlib
 import dlib.cuda as cuda
 from frame import *
 from hopenet import *
+import json
 import os
 import sys
 import time
@@ -20,21 +21,14 @@ from ui import main
 import utils
 from visage import Visage
 
-# python3 code/main.py --snapshot ./models/hopenet_robust_alpha1.pkl --face_model ./models/mmod_human_face_detector.dat --video ./videos/CCTV_1.mp4 --conf_threshold 0.8 --output ./output/output.txt
+# python3 code/main.py --video ./videos/CCTV_1.mp4 --output ./output/output.txt
 
 def parse_args():
   """Parse input arguments."""
   parser = argparse.ArgumentParser(description='Head pose estimation using the Hopenet network.')
-  parser.add_argument('--gpu', dest='gpu_id', help='GPU device id to use [0]',
-                      default=0, type=int)
-  parser.add_argument('--snapshot', dest='snapshot', help='Path of model snapshot.',
-                      default='', type=str)
-  parser.add_argument('--face_model', dest='face_model', help='Path of DLIB face detection model.',
-                      default='', type=str)
   parser.add_argument('--video', dest='video_path', help='Path of video', default='')
+  parser.add_argument('--config', dest='config_path', help='Path of the configuraiton JSON file', default='../config.json')
   parser.add_argument('--output', dest='output', help='Path and name to output file', default="../output/output.txt")
-  parser.add_argument('--frame', dest='frame', help='The frame to calculate', type=int, default=1)
-  parser.add_argument('--conf_threshold', dest='conf_threshold', help='The face detection threshold', type=float, default=0.75)
   args = parser.parse_args()
   return args
 
@@ -44,6 +38,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.setupUi(self)
     self.isPlaying = False
     self.isVideoLoaded = False
+    self.isLoadedData = False
     self.ret = True
     self.videoFPS = 25
     self.actualFrame = 0
@@ -63,9 +58,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.lastFrame_PB.clicked.connect(lambda: self.moveFrame(-1))
     self.headPosition_PB.clicked.connect(lambda: self.getHeadPosition())
     self.actionOpen_video.triggered.connect(self.selectVideo)
-    
     self.videoSlider.actionTriggered.connect(lambda: self.sliderChanged())
-    
     self.VideoWidget.wheelEvent = self.wheelEvent
     self.VideoWidget.mousePressEvent = self.mousePressEvent
     self.VideoWidget.mouseReleaseEvent = self.mouseReleaseEvent
@@ -102,7 +95,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.drawFrame() #we redraw the frame
   
   def getHeadPosition(self):
-    if(self.isVideoLoaded == False):
+    if(self.isVideoLoaded == False or self.isLoadedData == False):
       return
     visages = getFrameVisages(self.frame, self.hopenetModel, self.cnn_face_detector, self.transformations, self.conf_threshold, self.gpu_id)
     for vis in visages:
@@ -198,23 +191,34 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
         time.sleep(1. / self.videoFPS - elapsedTime)
 
     self.lastUpdate = timeit.default_timer()
+    
+  def loadConfig(self, jsonFile):
+    if not os.path.exists(jsonFile):
+      sys.exit('ERROR : Configuration file does not exist')
+    with open(jsonFile) as json_file:
+      data = json.load(json_file)
+      self.snapshot = data['snapshot']
+      self.face_model = data['face_model']
+      self.gpu_id = data['gpu_id']
+      self.conf_threshold = data['conf_threshold']
+      self.cache_string = data['cache_string']
 
-  def loadData(self, snapshot_path, face_model, gpu_id):
+  def loadData(self):
     cudnn.enabled = True
+    
+    print(torch.cuda.get_device_name(self.gpu_id))
     
     # ResNet50 structure
     self.hopenetModel = Hopenet(torchvision.models.resnet.Bottleneck, [3, 4, 6, 3], 66)
 
-    self.gpu_id = gpu_id
-
     dlib.DLIB_USE_CUDA = 1
 
     # Dlib face detection model
-    self.cnn_face_detector = dlib.cnn_face_detection_model_v1(face_model)
+    self.cnn_face_detector = dlib.cnn_face_detection_model_v1(self.face_model)
 
     print ('Loading snapshot.')
     # Load snapshot
-    saved_state_dict = torch.load(snapshot_path)
+    saved_state_dict = torch.load(self.snapshot)
     self.hopenetModel.load_state_dict(saved_state_dict)
 
     print ('Loading data.')
@@ -227,15 +231,16 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.hopenetModel.cuda(self.gpu_id)
 
     print ('Ready to test network.')
+    self.isLoadedData = True
 
     # Test the Model
     self.hopenetModel.eval()  # Change model to 'eval' mode (BN uses moving mean/var).
+    #torch.no_grad()
 
 
 if __name__ == '__main__':
   args = parse_args()
-
-  print(torch.cuda.get_device_name(args.gpu_id))
+ 
   
   app = QtWidgets.QApplication(sys.argv)
   window = MainWindow()
@@ -243,8 +248,8 @@ if __name__ == '__main__':
   
   if(args.video_path != ""): 
     window.loadVideo(args.video_path);
-  window.loadData(args.snapshot, args.face_model, args.gpu_id)
-  window.conf_threshold = args.conf_threshold
+  window.loadConfig(args.config_path)
+  window.loadData()
   window.output_path = args.output
 
   

@@ -1,0 +1,7 @@
+{
+  "snapshot": "../models/hopenet_robust_alpha1.pkl",
+  "face_model": "../models/mmod_human_face_detector.dat",
+  "gpu_id": 0,
+  "conf_threshold": 0.75,
+  "cache_string": "-IRC3D-cache"
+}
