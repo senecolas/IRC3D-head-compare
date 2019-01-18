@@ -46,6 +46,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.isVideoLoaded = False
     self.ret = True
     self.videoFPS = 25
+    self.actualFrame = 0
     self.isDragging = False
     self.lastUpdate = 0
     self.conf_threshold = 0.75
@@ -62,6 +63,9 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.lastFrame_PB.clicked.connect(lambda: self.moveFrame(-1))
     self.headPosition_PB.clicked.connect(lambda: self.getHeadPosition())
     self.actionOpen_video.triggered.connect(self.selectVideo)
+    
+    self.videoSlider.actionTriggered.connect(lambda: self.sliderChanged())
+    
     self.VideoWidget.wheelEvent = self.wheelEvent
     self.VideoWidget.mousePressEvent = self.mousePressEvent
     self.VideoWidget.mouseReleaseEvent = self.mouseReleaseEvent
@@ -80,6 +84,12 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
       self.centerY -= (event.pos().y() - self.mousePos.y())
       self.drawFrame() #we redraw the frame
     self.mousePos = event.pos()
+  
+  def sliderChanged(self):
+    self.isPlaying = False
+    if(self.videoSlider.value() + 1 == self.actualFrame):
+      return
+    self.setFrame(self.videoSlider.value() + 1)
     
   def wheelEvent(self, event):
     self.zoom = utils.clamp(1., self.zoom + event.angleDelta().y() * 0.002, 20.)
@@ -120,6 +130,7 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
       print("ERROR : Can't load", fileName)
       return 
     self.videoFPS = int(self.video.get(cv2.CAP_PROP_FPS))
+    self.videoSlider.setMaximum(self.video.get(cv2.CAP_PROP_FRAME_COUNT)- 1) # we set the slider
     self.isVideoLoaded = True
     self.setFrame(0) # we draw the first frame
     
@@ -127,13 +138,15 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     if(self.isVideoLoaded == False):
       return
     self.isPlaying = False
-    actualFrame = int(self.video.get(cv2.CAP_PROP_POS_FRAMES) - 1)
-    self.setFrame(actualFrame + num)
+    self.actualFrame = int(self.video.get(cv2.CAP_PROP_POS_FRAMES))
+    self.setFrame(self.actualFrame + num - 1)
     
   def setFrame(self, frameNum):
     if(self.isVideoLoaded == False):
       return
     self.video.set(1, frameNum)
+    self.actualFrame = int(self.video.get(cv2.CAP_PROP_POS_FRAMES))
+    self.videoSlider.setValue(self.actualFrame - 1)
     self.drawNextFrame()
   
   def drawNextFrame(self):
@@ -141,8 +154,13 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
       return
     self.ret, frame = self.video.read()
     if (self.ret == True):
+      # Draw frame
       self.frame = frame
       self.drawFrame()
+      # Update slider
+      self.actualFrame = int(self.video.get(cv2.CAP_PROP_POS_FRAMES))
+      self.videoSlider.setValue(self.actualFrame-1)
+
     else:
       self.isPlaying = False
   

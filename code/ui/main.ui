@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1282</width>
-    <height>475</height>
+    <width>662</width>
+    <height>472</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -63,6 +63,9 @@
        <height>351</height>
       </rect>
      </property>
+     <property name="cursor" stdset="0">
+      <cursorShape>ArrowCursor</cursorShape>
+     </property>
      <property name="verticalScrollBarPolicy">
       <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
@@ -95,14 +98,26 @@
       <x>60</x>
       <y>370</y>
       <width>541</width>
-      <height>61</height>
+      <height>65</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="menu">
      <item>
-      <widget class="QSlider" name="slider">
+      <widget class="QSlider" name="videoSlider">
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="maximum">
+        <number>1</number>
+       </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="tickPosition">
+        <enum>QSlider::TicksAbove</enum>
+       </property>
+       <property name="tickInterval">
+        <number>1</number>
        </property>
       </widget>
      </item>
@@ -156,8 +171,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1282</width>
-     <height>22</height>
+     <width>662</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
