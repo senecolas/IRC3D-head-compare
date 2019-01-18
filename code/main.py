@@ -118,14 +118,18 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.loadVideo(str(fileName))
     
   def loadVideo(self, fileName):
-    self.video = cv2.VideoCapture(fileName)
+    self.videoPath = fileName
+    self.video = cv2.VideoCapture(self.videoPath)
     if(not self.video.isOpened()):
-      print("ERROR : Can't load", fileName)
+      print("ERROR : Can't load", self.videoPath)
       return 
     self.videoFPS = int(self.video.get(cv2.CAP_PROP_FPS))
-    self.videoSlider.setMaximum(self.video.get(cv2.CAP_PROP_FRAME_COUNT)- 1) # we set the slider
+    self.frameCount = self.video.get(cv2.CAP_PROP_FRAME_COUNT)
+    self.videoSlider.setMaximum(self.frameCount - 1) # we set the slider
     self.isVideoLoaded = True
     self.setFrame(0) # we draw the first frame
+    self.cachePath = self.videoPath + self.cache_string + ".json"
+    self.loadCacheFile() #we load or create the cache file
     
   def moveFrame(self, num):
     if(self.isVideoLoaded == False):
@@ -202,6 +206,24 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
       self.gpu_id = data['gpu_id']
       self.conf_threshold = data['conf_threshold']
       self.cache_string = data['cache_string']
+      
+  def loadCacheFile(self):
+    if not os.path.exists(self.cachePath):
+      self.initCacheFile()
+    else:
+      with open(self.cachePath) as json_cacheFile:
+        self.cacheData = json.load(json_cacheFile)
+        print(self.cacheData)
+    
+  def initCacheFile(self):
+    self.cacheData = {"data": []}
+    for i in range(int(self.frameCount)):
+      self.cacheData["data"].append({"isLoaded": False})
+    self.saveCacheFile()
+      
+  def saveCacheFile(self):
+    with open(self.cachePath, 'w', encoding='utf-8') as outfile:
+      json.dump(self.cacheData, outfile)
 
   def loadData(self):
     cudnn.enabled = True
@@ -246,12 +268,12 @@ if __name__ == '__main__':
   window = MainWindow()
   window.show()
   
-  if(args.video_path != ""): 
-    window.loadVideo(args.video_path);
   window.loadConfig(args.config_path)
   window.loadData()
   window.output_path = args.output
-
+  
+  if(args.video_path != ""): 
+    window.loadVideo(args.video_path);
   
   timer = QtCore.QTimer()
   timer.timeout.connect(window.update)
