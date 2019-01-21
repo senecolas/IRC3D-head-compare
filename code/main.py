@@ -40,7 +40,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.isVideoLoaded = False
     self.isLoadedData = False
     self.ifDrawAxis = False
-    self.ifDrawCube = False
+    self.ifDrawSquare = False
     self.ret = True
     self.videoFPS = 25
     self.actualFrame = 0
@@ -93,10 +93,10 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.drawFrame() #we redraw the frame
     
   def drawCubeEvent(self):
-    if(self.ifDrawCube):
-      self.ifDrawCube = False
+    if(self.ifDrawSquare):
+      self.ifDrawSquare = False
     else:
-      self.ifDrawCube = True
+      self.ifDrawSquare = True
     self.drawFrame() #we redraw the frame
     
   def mouseMoveEvent(self, event):
@@ -114,7 +114,8 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     
   def confidenceChanged(self):
     self.conf_threshold = self.confidenceSlider.value() / 100.
-    self.confidenceInfo.setText(str(self.conf_threshold)) 
+    self.confidenceInfo.setText("{0:.2f}".format(self.conf_threshold))
+    self.drawFrame() #we redraw the frame
     
   def wheelEvent(self, event):
     self.zoom = utils.clamp(1., self.zoom + event.angleDelta().y() * 0.002, 20.)
@@ -231,14 +232,24 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
       self.isPlaying = False
       
   def drawAxis(self, frame):
+    for visage in self.getActualVisages():
+      visage.drawAxis(frame)
+    return frame
+  
+  def drawSquare(self, frame):
+    for visage in self.getActualVisages():
+      visage.drawSquare(frame)
+    return frame
+  
+  def getActualVisages(self):
+    res = []
     if(self.getActualCacheData()['isLoaded'] == False):
-      return frame
-    
+      return res
     for face in self.getActualCacheData()['faces']:
       visage = Visage().setJSONData(face)
       if(visage.confidence > self.conf_threshold):
-        visage.drawAxis(frame)
-    return frame
+        res.append(visage)
+    return res
   
   # Draw the actual frame on the screen
   def drawFrame(self):
@@ -250,6 +261,10 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     # add axis
     if(self.ifDrawAxis):
       frame = self.drawAxis(frame)
+      
+    # add square
+    if(self.ifDrawSquare):
+      frame = self.drawSquare(frame)
     
     # convert cv2 video to QPixmap
     rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

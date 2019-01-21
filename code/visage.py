@@ -3,7 +3,8 @@
 
 import cv2
 import json
-from math import cos, sin
+from math import cos
+from math import sin
 import numpy as np
 
 # class that manages the information of a face on a given frame
@@ -51,8 +52,6 @@ class Visage():
     return self
     
   def drawAxis(self, img):
-
-
     pitch = self.pitch * np.pi / 180
     yaw = -(self.yaw * np.pi / 180)
     roll = self.roll * np.pi / 180
@@ -66,7 +65,6 @@ class Visage():
     y1 = size * (cos(pitch) * sin(roll) + cos(roll) * sin(pitch) * sin(yaw)) + tdy
  
     # Y-Axis | drawn in green
-    #        v
     x2 = size * (-cos(yaw) * sin(roll)) + tdx
     y2 = size * (cos(pitch) * cos(roll) - sin(pitch) * sin(yaw) * sin(roll)) + tdy
 
@@ -80,4 +78,8 @@ class Visage():
 
     return img
 
+  def drawSquare(self, img):
+    cv2.rectangle(img, (int(self.x_min), int(self.y_min)), (int(self.x_max), int(self.y_max)), (0, 0, 255), 3)
+    return img
+    
 
