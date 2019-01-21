@@ -63,7 +63,13 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.VideoWidget.mousePressEvent = self.mousePressEvent
     self.VideoWidget.mouseReleaseEvent = self.mouseReleaseEvent
     self.VideoWidget.mouseMoveEvent = self.mouseMoveEvent
+    self.VideoWidget.resizeEvent = self.resizeEvent
     
+  def resizeEvent(self, event):
+    self.maxWidth = self.VideoWidget.geometry().width()
+    self.maxHeight = self.VideoWidget.geometry().height()
+    self.drawFrame() #we redraw the frame
+  
   def mousePressEvent(self, event):
     self.mousePos = event.pos()
     self.isDragging = True
@@ -277,7 +283,7 @@ if __name__ == '__main__':
   window.show()
   
   window.loadConfig(args.config_path)
-  window.loadData()
+  #window.loadData()
   window.output_path = args.output
   
   if(args.video_path != ""): 
