@@ -62,6 +62,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.actionOpen_video.triggered.connect(self.selectVideo)
     self.actionOpen_model.triggered.connect(self.selectModel)
     self.videoSlider.actionTriggered.connect(lambda: self.sliderChanged())
+    self.confidenceSlider.actionTriggered.connect(lambda: self.confidenceChanged())
     self.VideoWidget.wheelEvent = self.wheelEvent
     self.VideoWidget.mousePressEvent = self.mousePressEvent
     self.VideoWidget.mouseReleaseEvent = self.mouseReleaseEvent
@@ -93,6 +94,10 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
       return
     self.setFrame(self.videoSlider.value() + 1)
     
+  def confidenceChanged(self):
+    self.conf_threshold = self.confidenceSlider.value() / 100.
+    self.confidenceInfo.setText(str(self.conf_threshold)) 
+    
   def wheelEvent(self, event):
     self.zoom = utils.clamp(1., self.zoom + event.angleDelta().y() * 0.002, 20.)
     if(self.zoom == 1):
@@ -112,7 +117,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     if(self.getActualCacheData()['isLoaded']):
       print("Face already loaded")
       return
-    visages = getFrameVisages(self.frame, self.hopenetModel, self.cnn_face_detector, self.transformations, self.conf_threshold, self.gpu_id)
+    visages = getFrameVisages(self.frame, self.hopenetModel, self.cnn_face_detector, self.transformations, self.gpu_id)
     for vis in visages:
       self.getActualCacheData()['faces'].append(vis.getJSONData())
       vis.save(self.output_path)
@@ -252,6 +257,8 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
       self.gpu_id = data['gpu_id']
       self.conf_threshold = data['conf_threshold']
       self.cache_string = data['cache_string']
+    self.confidenceSlider.setValue(self.conf_threshold * 100)
+    self.confidenceChanged()
       
   def loadCacheFile(self):
     if not os.path.exists(self.cachePath):
