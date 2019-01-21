@@ -1,7 +1,10 @@
 # visage.py
 # Visage class and functions
 
+import cv2
 import json
+from math import cos, sin
+import numpy as np
 
 # class that manages the information of a face on a given frame
 class Visage():
@@ -45,4 +48,36 @@ class Visage():
     self.yaw = data['yaw']
     self.pitch = data['pitch']
     self.roll = data['roll']
+    return self
+    
+  def drawAxis(self, img):
+
+
+    pitch = self.pitch * np.pi / 180
+    yaw = -(self.yaw * np.pi / 180)
+    roll = self.roll * np.pi / 180
+
+    tdx = (self.x_min + self.x_max) / 2
+    tdy = (self.y_min + self.y_max) / 2
+    size = abs(self.y_max - self.y_min) / 2
+
+    # X-Axis pointing to right. drawn in red
+    x1 = size * (cos(yaw) * cos(roll)) + tdx
+    y1 = size * (cos(pitch) * sin(roll) + cos(roll) * sin(pitch) * sin(yaw)) + tdy
+ 
+    # Y-Axis | drawn in green
+    #        v
+    x2 = size * (-cos(yaw) * sin(roll)) + tdx
+    y2 = size * (cos(pitch) * cos(roll) - sin(pitch) * sin(yaw) * sin(roll)) + tdy
+
+    # Z-Axis (out of the screen) drawn in blue
+    x3 = size * (sin(yaw)) + tdx
+    y3 = size * (-cos(yaw) * sin(pitch)) + tdy
+
+    cv2.line(img, (int(tdx), int(tdy)), (int(x1), int(y1)), (0, 0, 255), 3)
+    cv2.line(img, (int(tdx), int(tdy)), (int(x2), int(y2)), (0, 255, 0), 3)
+    cv2.line(img, (int(tdx), int(tdy)), (int(x3), int(y3)), (255, 0, 0), 2)
+
+    return img
+
 

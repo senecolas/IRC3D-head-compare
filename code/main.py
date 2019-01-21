@@ -39,6 +39,8 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.isPlaying = False
     self.isVideoLoaded = False
     self.isLoadedData = False
+    self.ifDrawAxis = False
+    self.ifDrawCube = False
     self.ret = True
     self.videoFPS = 25
     self.actualFrame = 0
@@ -59,6 +61,8 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.next10Frame_PB.clicked.connect(lambda: self.moveFrame(10))
     self.last10Frame_PB.clicked.connect(lambda: self.moveFrame(-10))
     self.headPosition_PB.clicked.connect(lambda: self.getHeadPosition())
+    self.coordinates_PB.clicked.connect(lambda: self.drawAxisEvent())
+    self.square_BT.clicked.connect(lambda: self.drawCubeEvent())
     self.actionOpen_video.triggered.connect(self.selectVideo)
     self.actionOpen_model.triggered.connect(self.selectModel)
     self.videoSlider.actionTriggered.connect(lambda: self.sliderChanged())
@@ -80,6 +84,20 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
   
   def mouseReleaseEvent(self, event):
     self.isDragging = False
+  
+  def drawAxisEvent(self):
+    if(self.ifDrawAxis):
+      self.ifDrawAxis = False
+    else:
+      self.ifDrawAxis = True
+    self.drawFrame() #we redraw the frame
+    
+  def drawCubeEvent(self):
+    if(self.ifDrawCube):
+      self.ifDrawCube = False
+    else:
+      self.ifDrawCube = True
+    self.drawFrame() #we redraw the frame
     
   def mouseMoveEvent(self, event):
     if (self.isDragging):
@@ -202,23 +220,39 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     if (self.ret == True):
       # Draw frame
       self.frame = frame
+      self.actualFrame = int(self.video.get(cv2.CAP_PROP_POS_FRAMES))
       self.drawFrame()
       # Update slider
-      self.actualFrame = int(self.video.get(cv2.CAP_PROP_POS_FRAMES))
       self.videoSlider.setValue(self.actualFrame-1)
       # Update info
       self.updateInfo()
 
     else:
       self.isPlaying = False
+      
+  def drawAxis(self, frame):
+    if(self.getActualCacheData()['isLoaded'] == False):
+      return frame
+    
+    for face in self.getActualCacheData()['faces']:
+      visage = Visage().setJSONData(face)
+      if(visage.confidence > self.conf_threshold):
+        visage.drawAxis(frame)
+    return frame
   
   # Draw the actual frame on the screen
   def drawFrame(self):
     if(self.isVideoLoaded == False):
       return
     
+    frame = self.frame.copy()
+
+    # add axis
+    if(self.ifDrawAxis):
+      frame = self.drawAxis(frame)
+    
     # convert cv2 video to QPixmap
-    rgbImage = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
+    rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     convertToQtFormat = QtGui.QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0], QtGui.QImage.Format_RGB888)
     convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
     pixmap = QtGui.QPixmap(convertToQtFormat)
@@ -322,7 +356,7 @@ if __name__ == '__main__':
   window.show()
   
   window.loadConfig(args.config_path)
-  window.loadData()
+  #window.loadData()
   window.output_path = args.output
   
   if(args.video_path != ""): 
