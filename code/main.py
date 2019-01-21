@@ -128,7 +128,10 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.drawFrame() #we redraw the frame
     
   def getActualCacheData(self):
-    return self.cacheData['data'][int(self.actualFrame - 1)]
+    return self.getCacheData(int(self.actualFrame - 1))
+  
+  def getCacheData(self, index):
+    return self.cacheData['data'][index]
   
   def getHeadPosition(self):
     if(self.isVideoLoaded == False or self.isLoadedData == False):
@@ -143,6 +146,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.getActualCacheData()['isLoaded'] = True
     self.saveCacheFile()
     self.updateInfo()
+    self.updateProcessTable(self.actualFrame-1)
     self.drawFrame()
     
   def play(self):
@@ -163,7 +167,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
       faceNumber = self.getActualCacheData()['faces'].__len__()
       if(faceNumber > 0):
         visagesInfo = str(faceNumber) + " face(s) detected"
-        self.visagesInfo.setStyleSheet("color: rgb(0, 102, 0);")
+        self.visagesInfo.setStyleSheet("color: rgb(0, 153, 0);")
       else:
         visagesInfo = "No faces were detected"
         self.visagesInfo.setStyleSheet("color: rgb(255, 102, 0);")
@@ -192,12 +196,41 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
       print("ERROR : Can't load", self.videoPath)
       return 
     self.videoFPS = int(self.video.get(cv2.CAP_PROP_FPS))
-    self.frameCount = self.video.get(cv2.CAP_PROP_FRAME_COUNT)
-    self.videoSlider.setMaximum(self.frameCount - 1) # we set the slider
+    self.frameCount = int(self.video.get(cv2.CAP_PROP_FRAME_COUNT))
+    
+    # we set the slider
+    self.videoSlider.setMaximum(self.frameCount - 1) 
+    
+    # we load the cache
     self.cachePath = self.videoPath + self.cache_string + ".json"
     self.isVideoLoaded = True
     self.loadCacheFile() #we load or create the cache file
-    self.setFrame(0) # we draw the first frame
+    
+    # and we load the process table view
+    self.loadProcessTable()
+    
+    # we draw the first frame
+    self.setFrame(0) 
+    
+  def loadProcessTable(self):
+    self.videoProcessTable.setColumnCount(self.frameCount)
+    self.videoProcessTable.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+    for i in range(self.frameCount):
+      item = QtWidgets.QTableWidgetItem()
+      self.videoProcessTable.setItem(0, i, item)
+      self.updateProcessTable(i)
+        
+  def updateProcessTable(self, index):
+    bg = QtGui.QColor(153, 153, 153) #default background (gray)
+    # if a frame is loas
+    if(self.getCacheData(index)['isLoaded']):
+      # Frame with visages
+      if(self.getCacheData(index)['faces'].__len__() > 0):
+        bg = QtGui.QColor(0, 153, 0)
+      # Frame without visages
+      else:
+        bg = QtGui.QColor(255, 102, 0)
+    self.videoProcessTable.item(0, index).setBackground(bg)
     
   def moveFrame(self, num):
     if(self.isVideoLoaded == False):
@@ -371,7 +404,7 @@ if __name__ == '__main__':
   window.show()
   
   window.loadConfig(args.config_path)
-  #window.loadData()
+  window.loadData()
   window.output_path = args.output
   
   if(args.video_path != ""): 
