@@ -417,20 +417,32 @@
           <item>
            <widget class="QLabel" name="frameInfo">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Frame : 1/31</string>
+             <string>Frame: ...</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QLabel" name="visagesInfo">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>Frame not process</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -444,13 +456,13 @@
           <item>
            <widget class="QLabel" name="videoInfo">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Video : D:DesktopIRC3D-head-comparevideos</string>
+             <string>Video: ...</string>
             </property>
             <property name="textFormat">
              <enum>Qt::AutoText</enum>
@@ -468,8 +480,14 @@
           </item>
           <item>
            <widget class="QLabel" name="modelInfo">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
-             <string>Model : D:DesktopIRC3D-head-comparevideos</string>
+             <string>Model: ...</string>
             </property>
             <property name="textFormat">
              <enum>Qt::AutoText</enum>
@@ -508,12 +526,18 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen_video"/>
+    <addaction name="actionOpen_model"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
   <action name="actionOpen_video">
    <property name="text">
     <string>Open video...</string>
+   </property>
+  </action>
+  <action name="actionOpen_model">
+   <property name="text">
+    <string>Open model...</string>
    </property>
   </action>
  </widget>

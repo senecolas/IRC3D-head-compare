@@ -60,6 +60,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.last10Frame_PB.clicked.connect(lambda: self.moveFrame(-10))
     self.headPosition_PB.clicked.connect(lambda: self.getHeadPosition())
     self.actionOpen_video.triggered.connect(self.selectVideo)
+    self.actionOpen_model.triggered.connect(self.selectModel)
     self.videoSlider.actionTriggered.connect(lambda: self.sliderChanged())
     self.VideoWidget.wheelEvent = self.wheelEvent
     self.VideoWidget.mousePressEvent = self.mousePressEvent
@@ -117,6 +118,8 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
       vis.save(self.output_path)
     self.getActualCacheData()['isLoaded'] = True
     self.saveCacheFile()
+    self.updateInfo()
+    self.drawFrame()
     
   def play(self):
     if(self.isVideoLoaded == False):
@@ -129,12 +132,37 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
   def pause(self):
     self.isPlaying = False
     
+  def updateInfo(self):
+    frameInfo = "Frame: " + str(int(self.actualFrame)) + "/" + str(int(self.frameCount))
+    self.frameInfo.setText(frameInfo)
+    if(self.getActualCacheData()['isLoaded']):
+      faceNumber = self.getActualCacheData()['faces'].__len__()
+      if(faceNumber > 0):
+        visagesInfo = str(faceNumber) + " face(s) detected"
+        self.visagesInfo.setStyleSheet("color: rgb(0, 102, 0);")
+      else:
+        visagesInfo = "No faces were detected"
+        self.visagesInfo.setStyleSheet("color: rgb(255, 102, 0);")
+    else:
+      visagesInfo = "Frame not process"
+      self.visagesInfo.setStyleSheet("color: rgb(255, 0, 0);")
+    self.visagesInfo.setText(visagesInfo)
+    
   def selectVideo(self):
     fileName = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Video')[0]
     self.loadVideo(str(fileName))
+  
+  def selectModel(self):
+    fileName = QtWidgets.QFileDialog.getOpenFileName(self, 'Select 3D Model')[0]
+    self.loadModel(str(fileName))
+        
+  def loadModel(self, fileName):
+    self.ModelPath = fileName
+    self.modelInfo.setText("Model: " + self.ModelPath)
     
   def loadVideo(self, fileName):
     self.videoPath = fileName
+    self.videoInfo.setText("Video: " + self.videoPath)
     self.video = cv2.VideoCapture(self.videoPath)
     if(not self.video.isOpened()):
       print("ERROR : Can't load", self.videoPath)
@@ -142,10 +170,10 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.videoFPS = int(self.video.get(cv2.CAP_PROP_FPS))
     self.frameCount = self.video.get(cv2.CAP_PROP_FRAME_COUNT)
     self.videoSlider.setMaximum(self.frameCount - 1) # we set the slider
-    self.isVideoLoaded = True
-    self.setFrame(0) # we draw the first frame
     self.cachePath = self.videoPath + self.cache_string + ".json"
+    self.isVideoLoaded = True
     self.loadCacheFile() #we load or create the cache file
+    self.setFrame(0) # we draw the first frame
     
   def moveFrame(self, num):
     if(self.isVideoLoaded == False):
@@ -173,6 +201,8 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
       # Update slider
       self.actualFrame = int(self.video.get(cv2.CAP_PROP_POS_FRAMES))
       self.videoSlider.setValue(self.actualFrame-1)
+      # Update info
+      self.updateInfo()
 
     else:
       self.isPlaying = False
@@ -285,7 +315,7 @@ if __name__ == '__main__':
   window.show()
   
   window.loadConfig(args.config_path)
-  #window.loadData()
+  window.loadData()
   window.output_path = args.output
   
   if(args.video_path != ""): 
