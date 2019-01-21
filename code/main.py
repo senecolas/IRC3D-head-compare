@@ -32,7 +32,7 @@ def parse_args():
   args = parser.parse_args()
   return args
 
-class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
+class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
   def __init__(self, parent=None):
     super(MainWindow, self).__init__(parent=parent)
     self.setupUi(self)
@@ -56,6 +56,8 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
     self.pause_PB.clicked.connect(lambda: self.pause())
     self.nextFrame_PB.clicked.connect(lambda: self.moveFrame(1))
     self.lastFrame_PB.clicked.connect(lambda: self.moveFrame(-1))
+    self.next10Frame_PB.clicked.connect(lambda: self.moveFrame(10))
+    self.last10Frame_PB.clicked.connect(lambda: self.moveFrame(-10))
     self.headPosition_PB.clicked.connect(lambda: self.getHeadPosition())
     self.actionOpen_video.triggered.connect(self.selectVideo)
     self.videoSlider.actionTriggered.connect(lambda: self.sliderChanged())
