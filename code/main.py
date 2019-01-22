@@ -21,7 +21,7 @@ from ui import main
 import utils
 from visage import Visage
 
-# python3 code/main.py --video ./videos/CCTV_1.mp4 --output ./output/output.txt
+# python3 main.py --video ../videos/CCTV_1.mp4 --output ../output/output.txt
 
 def parse_args():
   """Parse input arguments."""
