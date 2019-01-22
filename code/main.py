@@ -21,6 +21,14 @@ from ui import main
 import utils
 from visage import Visage
 
+import ctypes
+
+import pyglet
+from pyglet.gl import *
+
+from pywavefront import visualization
+from pywavefront import Wavefront
+
 # python3 main.py --video ../videos/CCTV_1.mp4 --output ../output/output.txt
 
 def parse_args():

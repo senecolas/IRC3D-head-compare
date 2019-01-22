@@ -65,6 +65,12 @@ def on_draw():
     glRotatef(rz, 0, 0, 1)
 
     visualization.draw(mesh)
+    #window.set_visible(False)
+
+@window.event
+def on_key_press(symbol, modifiers):
+    pyglet.image.get_buffer_manager().get_color_buffer().save('screenshot.png')
+
 
 def update(dt):
     # In case we have something to change on the mesh (like rotation for example)
