@@ -11,7 +11,7 @@ import math
 
 # Mesh load and OpenGL context init
 mesh = Wavefront('../face orientation/visage.obj')
-viewport = (1000,1000)
+viewport = (1600,900)
 window = pyglet.window.Window(viewport[0],viewport[1], caption='Mesh orientation', resizable=True)
 lightfv = ctypes.c_float * 4
 rx, ry, rz = (0,0,0)
@@ -29,7 +29,7 @@ rx, ry, rz = (0,0,0)
 # content = file.readlines()
 # file.close()
 
-window.set_visible(False)
+#window.set_visible(False)
 
 glMatrixMode(GL_PROJECTION)
 glLoadIdentity()
@@ -60,7 +60,7 @@ glRotatef(rz, 0, 0, 1)
 
 visualization.draw(mesh)
 
-n = int(input("0 : print screenshot | 1 : nothing"))
+n = 1#int(input("0 : print screenshot | 1 : continue"))
 if n == 0 :
     print("ok ")
     pyglet.image.get_buffer_manager().get_color_buffer().save('screenshot.png')
@@ -70,7 +70,8 @@ def on_resize(width, height):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     width, height = viewport
-    gluPerspective(90.0, width/float(height), 1, 100.0)
+    # Camera angle to setup here
+    gluPerspective(90.0, width/float(height), 1, 150.0)
     glEnable(GL_DEPTH_TEST)
     glMatrixMode(GL_MODELVIEW)
     return True
@@ -102,9 +103,9 @@ def on_draw():
 
     visualization.draw(mesh)
 
-@window.event
-def on_key_press(symbol, modifiers):
-    pyglet.image.get_buffer_manager().get_color_buffer().save('screenshot.png')
+# @window.event
+# def on_key_press(symbol, modifiers):
+#     pyglet.image.get_buffer_manager().get_color_buffer().save('screenshot.png')
 
 
 def update(dt):

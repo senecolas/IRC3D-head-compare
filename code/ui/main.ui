@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>350</height>
+    <width>1027</width>
+    <height>538</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -85,18 +85,12 @@
           </widget>
          </item>
          <item>
-          <widget class="QOpenGLWidget" name="openGLWidget">
+          <widget class="QGraphicsView" name="graphicsView">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>50</horstretch>
-             <verstretch>100</verstretch>
+             <verstretch>0</verstretch>
             </sizepolicy>
-           </property>
-           <property name="focusPolicy">
-            <enum>Qt::StrongFocus</enum>
-           </property>
-           <property name="acceptDrops">
-            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -616,8 +610,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
-     <height>21</height>
+     <width>1027</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
