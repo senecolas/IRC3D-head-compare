@@ -3,9 +3,6 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 import argparse
 import cv2
-import datasets
-import dlib
-import dlib.cuda as cuda
 from face import Face
 from frame import *
 from hopenet import *
@@ -14,10 +11,6 @@ import os
 import sys
 import time
 import timeit
-import torch
-import torch.backends.cudnn as cudnn
-import torchvision
-from torchvision import transforms
 from ui import main
 import utils
 
@@ -41,13 +34,14 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     # DEFAULT VARIABLES
     self.isPlaying = False
     self.isVideoLoaded = False
-    self.isLoadedData = False
     self.ifDrawAxis = False
     self.ifDrawSquare = False
     self.ret = True
     self.videoFPS = 25
     self.currentFrame = 0
     self.isDragging = False
+    self.faceDetector = None
+    self.progressDialog = None
     self.lastUpdate = 0
     self.conf_threshold = 0.75
     self.maxWidth = self.VideoWidget.geometry().width()
@@ -199,6 +193,11 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.isPlaying = False   
     
     
+  def stopFaceDetector(self):
+    """ Stop the frame calculation of the face detector """
+    self.faceDetector.stop()
+    
+    
   def moveFrame(self, num):
     """ Moves the current frame by 'num' frames """  
     if(self.isVideoLoaded == False):
@@ -221,29 +220,36 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
   def getHeadPosition(self):
     """ Launch the calculation to get the faces of the current frame and saves it in the cache file """
     
-    if(self.isVideoLoaded == False or self.isLoadedData == False):
+    if(self.isVideoLoaded == False):
       return self.getCurrentCacheData()
     if(self.getCurrentCacheData()['isLoaded']):
       print("Face already loaded")
-      return self.getCurrentCacheData()['faces']
+      return self.getCurrentCacheData()
+    
+    # Set progress bar
+    self.setProgressDialog("Get head position (%d/%d)" % (self.currentFrame, self.frameCount), self.stopFaceDetector)
     
     # Get faces
-    faces = getFrameFaces(self.frame, self.hopenetModel, self.cnn_face_detector, self.transformations, self.gpu_id)
-    for vis in faces:
-      self.getCurrentCacheData()['faces'].append(vis.getJSONData())
-      vis.save(self.output_path)
-    
-    # Updated cache, info and processTable
-    self.getCurrentCacheData()['isLoaded'] = True
-    self.saveCacheFile()
-    self.updateInfo()
-    self.updateProcessTable(self.currentFrame-1)
-    
+    try :
+      faces = self.faceDetector.getFrameFaces(self.frame, self.updateProgressDialog)
+      for vis in faces:
+        self.getCurrentCacheData()['faces'].append(vis.getJSONData())
+        vis.save(self.output_path)
+
+      # Updated cache, info and processTable
+      self.getCurrentCacheData()['isLoaded'] = True
+      self.saveCacheFile()
+      self.updateInfo()
+      self.updateProcessTable(self.currentFrame-1)
+      
+    except :
+      print("stopped getHeadPosition")
+      
     # Redraw the frame
     self.drawFrame()
     
     # return 
-    return self.getCurrentCacheData()['faces']
+    return self.getCurrentCacheData()
 
 
   def saveCacheFile(self):
@@ -277,27 +283,60 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
       if(face.confidence > self.conf_threshold):
         res.append(face)
     return res
+
   
+  
+  #################################
+  ### ====   PROGRESS BAR  ==== ###
+  #################################
+  
+  def setProgressDialog(self, title = "Traitement", stopCallback=None):
+    """ Create the QProgressDialog and show it """
+    self.progressDialog = QtWidgets.QProgressDialog(title, "Stop", 0, 100, self)
+    self.progressDialog.setWindowTitle(title)
+    self.progressDialog.setMinimumWidth(400)
+    if stopCallback != None:
+      self.progressDialog.canceled.connect(stopCallback)
+    else:
+      self.progressDialog.setCancelButton(None)
+    self.progressDialog.show()
+
+
+  def updateProgressDialog(self, percentage, msg):
+    """ Update the QProgressDialog """
+    self.progressDialog.setValue(percentage * 100)
+    self.progressDialog.setLabelText(msg)
+    if percentage >= 1.:
+      self.progressDialog.reset()
+    QtCore.QCoreApplication.processEvents()
+ 
   
   
   #################################
   ### ====     LOADING     ==== ###
   #################################
   
-  def loadConfig(self, jsonFile):
-    """ Loads the configuration from a JSON file """
+  def load(self, jsonFile):
+    """ Loads data with JSON configuration file """
     if not os.path.exists(jsonFile):
       sys.exit('ERROR : Configuration file does not exist')
     with open(jsonFile) as json_file:
       data = json.load(json_file)
       self.snapshot = data['snapshot']
       self.face_model = data['face_model']
-      self.gpu_id = data['gpu_id']
+      self.gpu_id = data['gpu_id']   
       self.conf_threshold = data['conf_threshold']
       self.cache_string = data['cache_string']
+      
+    self.loadFaceDetector()
     self.confidenceSlider.setValue(self.conf_threshold * 100)
     self.confidenceChanged()
 
+  def loadFaceDetector(self):
+    """ Init and load FaceDetector class """
+    self.setProgressDialog("Load Face Detector")
+    self.faceDetector = FaceDetector(self.face_model, self.snapshot, self.gpu_id)
+    self.faceDetector.load(self.updateProgressDialog)
 
   def loadModel(self, fileName):
     """ Load a 3D model """
@@ -358,41 +397,6 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
                                     "faces": []})
     self.saveCacheFile()
       
-  def loadData(self):
-    """ Load deep learning data (DLIB and Hopenet) """
-    cudnn.enabled = True
-    
-    print(torch.cuda.get_device_name(self.gpu_id))
-    
-    # ResNet50 structure
-    self.hopenetModel = Hopenet(torchvision.models.resnet.Bottleneck, [3, 4, 6, 3], 66)
-
-    dlib.DLIB_USE_CUDA = 1
-
-    # Dlib face detection model
-    self.cnn_face_detector = dlib.cnn_face_detection_model_v1(self.face_model)
-
-    print ('Loading snapshot.')
-    # Load snapshot
-    saved_state_dict = torch.load(self.snapshot)
-    self.hopenetModel.load_state_dict(saved_state_dict)
-
-    print ('Loading data.')
-
-    self.transformations = transforms.Compose([transforms.Scale(224),
-                                              transforms.CenterCrop(224), transforms.ToTensor(),
-                                              transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
-
-    
-    self.hopenetModel.cuda(self.gpu_id)
-
-    print ('Ready to test network.')
-    self.isLoadedData = True
-
-    # Test the Model
-    self.hopenetModel.eval()  # Change model to 'eval' mode (BN uses moving mean/var).
-    #torch.no_grad()
-
   
   
   #################################
@@ -530,8 +534,7 @@ if __name__ == '__main__':
   window = MainWindow()
   window.show()
   
-  window.loadConfig(args.config_path)
-  window.loadData()
+  window.load(args.config_path)
   window.output_path = args.output
   
   if(args.video_path != ""): 
