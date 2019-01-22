@@ -1,10 +1,10 @@
+from Face import Face
+from FaceDetector import FaceDetector
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 import argparse
 import cv2
-from face import Face
-from frame import *
 from hopenet import *
 import json
 import os
@@ -60,6 +60,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.next10Frame_PB.clicked.connect(lambda: self.moveFrame(10))
     self.last10Frame_PB.clicked.connect(lambda: self.moveFrame(-10))
     self.headPosition_PB.clicked.connect(lambda: self.getHeadPosition())
+    self.processAllVideo_PB.clicked.connect(lambda: self.processAllVideo())
     self.coordinates_PB.clicked.connect(lambda: self.drawAxisEvent())
     self.square_BT.clicked.connect(lambda: self.drawSquareEvent())
     
@@ -216,6 +217,14 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.videoSlider.setValue(self.currentFrame - 1)
     self.drawNextFrame()
 
+  def processAllVideo(self):
+    """ Launch the getHeadPosition function for all frame from the current frame """
+    for i in range(self.currentFrame, self.frameCount + 1):
+      self.getHeadPosition()
+      if self.faceDetector.isStopped() :
+        break
+      self.drawNextFrame()
+    
 
   def getHeadPosition(self):
     """ Launch the calculation to get the faces of the current frame and saves it in the cache file """
@@ -223,26 +232,25 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     if(self.isVideoLoaded == False):
       return self.getCurrentCacheData()
     if(self.getCurrentCacheData()['isLoaded']):
-      print("Face already loaded")
       return self.getCurrentCacheData()
     
     # Set progress bar
     self.setProgressDialog("Get head position (%d/%d)" % (self.currentFrame, self.frameCount), self.stopFaceDetector)
     
     # Get faces
-    try :
+    try:
       faces = self.faceDetector.getFrameFaces(self.frame, self.updateProgressDialog)
       for vis in faces:
         self.getCurrentCacheData()['faces'].append(vis.getJSONData())
-        vis.save(self.output_path)
 
       # Updated cache, info and processTable
+      self.updateProgressDialog(0.99, "Saving faces")
       self.getCurrentCacheData()['isLoaded'] = True
       self.saveCacheFile()
       self.updateInfo()
       self.updateProcessTable(self.currentFrame-1)
-      
-    except :
+      self.updateProgressDialog(1.0, "End of the faces calculation")
+    except:
       print("stopped getHeadPosition")
       
     # Redraw the frame
@@ -290,7 +298,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
   ### ====   PROGRESS BAR  ==== ###
   #################################
   
-  def setProgressDialog(self, title = "Traitement", stopCallback=None):
+  def setProgressDialog(self, title="Traitement", stopCallback=None):
     """ Create the QProgressDialog and show it """
     self.progressDialog = QtWidgets.QProgressDialog(title, "Stop", 0, 100, self)
     self.progressDialog.setWindowTitle(title)
