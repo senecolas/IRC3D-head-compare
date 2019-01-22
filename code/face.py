@@ -1,5 +1,5 @@
 # visage.py
-# Visage class and functions
+# Face class and functions
 
 import cv2
 import json
@@ -8,7 +8,7 @@ from math import sin
 import numpy as np
 
 # class that manages the information of a face on a given frame
-class Visage():
+class Face():
   def __init__(self, confidence=1., x_min=-1, x_max=-1, y_min=-1, y_max=-1, yaw=0., pitch=0., roll=0.):
     self.confidence = confidence
     self.x_min = x_min
@@ -23,7 +23,7 @@ class Visage():
   def save(self, path):
     txt_out = open(path, 'w')
     txt_out.write('%f %f %f\n' % (self.yaw, self.pitch, self.roll))
-    print("Visage orientation save on", path)
+    print("Face orientation save on", path)
   
   
   def getJSONData(self):

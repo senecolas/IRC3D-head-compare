@@ -1,5 +1,5 @@
 from PIL import Image
-from visage import Visage
+from face import Face
 import cv2
 import datasets
 import dlib
@@ -17,14 +17,14 @@ from torchvision import transforms
 #   model = hopenet load model
 #   cnn_face_detector = Dlib face detection model
 #   gpu = the gpu id
-def getFrameVisages(frame, model, cnn_face_detector, transformations, gpu):
+def getFrameFaces(frame, model, cnn_face_detector, transformations, gpu):
   # Result data
   res = [];
 
   # We read the frame
   cv2_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-  # Dlib visage detection
+  # Dlib face detection
   startDLIB = timeit.default_timer()
   print("-- Dlib Face detector")
   dets = cnn_face_detector(cv2_frame, gpu)
@@ -34,7 +34,7 @@ def getFrameVisages(frame, model, cnn_face_detector, transformations, gpu):
   idx_tensor = [idx for idx in range(66)]
   idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
 
-  # For each detected visages
+  # For each detected faces
   for idx, det in enumerate(dets):
     # Get x_min, y_min, x_max, y_max, conf
     x_min = det.rect.left()
@@ -45,9 +45,9 @@ def getFrameVisages(frame, model, cnn_face_detector, transformations, gpu):
 
     print("Possible face (", x_min, ",", y_min, ",", x_max, ",", y_max, ") with", conf, "confidence ")
 
-    print("-- Visage detected")
+    print("-- Face detected")
     print("-- Calculation of orientation")
-    startVisage = timeit.default_timer()
+    startFace = timeit.default_timer()
 
     # coordinate of the face
     bbox_width = abs(x_max - x_min)
@@ -84,10 +84,10 @@ def getFrameVisages(frame, model, cnn_face_detector, transformations, gpu):
 
     # save data
     print("-- Result : ", yaw_predicted, pitch_predicted, roll_predicted)
-    res.append(Visage(conf, x_min, x_max, y_min, y_max, yaw_predicted, pitch_predicted, roll_predicted))
+    res.append(Face(conf, x_min, x_max, y_min, y_max, yaw_predicted, pitch_predicted, roll_predicted))
 
     # end of loop
-    print("   Time : " + str(timeit.default_timer() - startVisage))
+    print("   Time : " + str(timeit.default_timer() - startFace))
 
   return res
       
