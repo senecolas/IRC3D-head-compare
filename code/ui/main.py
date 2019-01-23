@@ -332,7 +332,7 @@ class Ui_MainWindow(object):
         self.actionOpen_video.setText(_translate("MainWindow", "Open video..."))
         self.actionOpen_model.setText(_translate("MainWindow", "Open model..."))
 
-from PyQt5 import icons_rc
+from ui import icons_rc
 
 if __name__ == "__main__":
     import sys

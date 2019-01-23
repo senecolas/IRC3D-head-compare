@@ -45,7 +45,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.setupUi(self)
     self.isPlaying = False
     self.isVideoLoaded = False
-    self.isModelData = False
+    self.isModelLoaded = False
     self.isLoadedData = False
     self.ifDrawAxis = False
     self.ifDrawSquare = False
@@ -447,16 +447,15 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
 
     visualization.draw(self.mesh)
 
-    return pyglet.image.get_buffer_manager().get_color_buffer()
+    print('ok1')
+    pyglet.image.get_buffer_manager().get_color_buffer().save('screenshot.png')
+    print('ok2')
 
-  def drawGLFrame(self):
+    rgbImage = pyglet.image.get_buffer_manager().get_color_buffer()
 
-    frame = self.getGLFrame();
-
-    # convert cv2 video to QPixmap
-    rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    convertToQtFormat = QtGui.QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0], QtGui.QImage.Format_RGB888)
+    convertToQtFormat = QtGui.QImage(rgbImage.get_image_data().data, rgbImage.get_image_data().width, rgbImage.get_image_data().height, QtGui.QImage.Format_RGB888)
     convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
+
     pixmap = QtGui.QPixmap(convertToQtFormat)
     
     # Resize with zoom
@@ -465,10 +464,15 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     # Add image
     scene = QtWidgets.QGraphicsScene() 
     scene.addItem(QtWidgets.QGraphicsPixmapItem(pixmap))
-    self.VideoWidget.setScene(scene) 
+    self.GLWidget.setScene(scene) 
     
     #Center on the appropriate position
-    self.VideoWidget.centerOn(self.centerX, self.centerY)
+    self.GLWidget.centerOn(self.centerX, self.centerY)
+
+  def drawGLFrame(self):
+
+    self.getGLFrame()
+    
 
 if __name__ == '__main__':
   args = parse_args()
@@ -481,6 +485,7 @@ if __name__ == '__main__':
   window.loadConfig(args.config_path)
   window.loadData()
   window.initGL()
+  window.drawGLFrame()
   window.output_path = args.output
   
   if(args.video_path != ""): 
