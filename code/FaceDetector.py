@@ -1,15 +1,16 @@
+from Face import Face
 from PIL import Image
 import cv2
 import datasets
 import dlib
 import dlib.cuda as cuda
-from Face import Face
 from hopenet import *
 import timeit
+import time
 import torch
+import torch.backends.cudnn as cudnn
 import torchvision
 from torchvision import transforms
-import torch.backends.cudnn as cudnn
 
 """
 FaceDetector.py
@@ -19,24 +20,38 @@ Faces detection management class
 class FaceDetector():
   def __init__(self, faceModelPath, snapshotPath, gpuID=None):
     self.gpuId = gpuID
+    self.deviceType = 'cuda'
     self.faceModelPath = faceModelPath
     self.snapshotPath = snapshotPath
     self.isLoadedData = False
     self.hopenetModel = None
     self.cnnFaceDetector = None
     self.transformation = None
+    self.device = None
     self.isStop = False
 
+  def setTorchConfig(self):
+    """ Set the CPU or GPU configuration """
+    
+    if torch.cuda.is_available() and self.gpuId >= 0: # CUDA is available 
+      if self.gpuId >= torch.cuda.device_count(): # invalid GPU ID, we take the current GPU
+        self.gpuId = torch.cuda.current_device()
+      self.device = torch.device('cuda:%d' % (self.gpuId))
+      cudnn.enabled = True
+      # CUDA INFO
+      print(torch.cuda.get_device_name(self.gpuId))
+      
+    else: # CUDA is not available or gpuId = -1 (force CPU), use CPU
+      self.deviceType = 'cpu'
+      self.device = torch.device('cpu') 
 
   def load(self, callback=None):
     """ Load deep learning data (DLIB and Hopenet). Call the callback(float, string) function with percentage and progress message at each state change """
     if callback != None:
       callback(0.0, "Get GPU/CPU config...")
     
-    #Get GPU/CPU config ==> TO DO
-    cudnn.enabled = True
-    print(torch.cuda.get_device_name(self.gpuId))
-    dlib.DLIB_USE_CUDA = 1
+    #Get GPU/CPU config
+    self.setTorchConfig()
     
     if callback != None:
       callback(0.22, "Set Hopenet and Dlib Model...")
@@ -45,12 +60,16 @@ class FaceDetector():
     self.hopenetModel = Hopenet(torchvision.models.resnet.Bottleneck, [3, 4, 6, 3], 66)
     # Dlib face detection model
     self.cnnFaceDetector = dlib.cnn_face_detection_model_v1(self.faceModelPath)
-    
+
     if callback != None:
       callback(0.33, "Loading snapshot (Hopenet pkl model)...")  
 
     # Load snapshot
-    saved_state_dict = torch.load(self.snapshotPath)
+    if self.deviceType == 'cuda':
+      saved_state_dict = torch.load(self.snapshotPath)
+    else:
+      saved_state_dict = torch.load(self.snapshotPath, map_location=lambda storage, loc: storage)
+
     self.hopenetModel.load_state_dict(saved_state_dict)
     
     if callback != None:
@@ -59,7 +78,11 @@ class FaceDetector():
     self.transformations = transforms.Compose([transforms.Scale(224),
                                               transforms.CenterCrop(224), transforms.ToTensor(),
                                               transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])   
-    self.hopenetModel.cuda(self.gpuId)
+    
+    if self.deviceType == 'cuda':
+      self.hopenetModel.cuda(self.device)
+    else:
+      self.hopenetModel.cpu()
   
     if callback != None:
       callback(1.0, "Ready to test network...") 
@@ -69,7 +92,6 @@ class FaceDetector():
     # Test the Model
     self.hopenetModel.eval()  # Change model to 'eval' mode (BN uses moving mean/var).
     #torch.no_grad()
-
 
   def stop(self):
     """ Stop the frame calculation """
@@ -86,26 +108,31 @@ class FaceDetector():
     """ Get faces of the frame. Call the callback(float, string) function with percentage and progress message at each state change. Raise exception if stopProcessing is called  """
     res = []; # Result data
     self.isStop = False
+    startTime = timeit.default_timer()
 
     # We read the frame
     cv2_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     
-    if self.isStop : 
+    if self.isStop: 
       raise
     if callback != None:
       callback(0.01, "Dlib face detection (this may be long)") 
 
     # Dlib face detection
-    dets = self.cnnFaceDetector(cv2_frame, self.gpuId)
+    dets = self.cnnFaceDetector(cv2_frame, 1)
 
-    if self.isStop : 
+    if self.isStop: 
       raise
     if callback != None:
       callback(0.7, "Calculate tensor") 
 
     # we calculate tensor
     idx_tensor = [idx for idx in range(66)]
-    idx_tensor = torch.FloatTensor(idx_tensor).cuda(self.gpuId)
+
+    if self.deviceType == 'cuda':
+      idx_tensor = torch.FloatTensor(idx_tensor).cuda(self.device)
+    else:
+      idx_tensor = torch.FloatTensor(idx_tensor).cpu()
     
     facesNumber = len(list(enumerate(dets)))
     faceCount = 0
@@ -114,10 +141,10 @@ class FaceDetector():
     for idx, det in enumerate(dets):
       faceCount += 1
       
-      if self.isStop : 
+      if self.isStop: 
         raise
       if callback != None:
-        callback(0.75 + 0.25 * faceCount/facesNumber, "Calculate face orientation (%d/%d)" % (faceCount, facesNumber)) 
+        callback(0.75 + 0.25 * faceCount / facesNumber, "Calculate face orientation (%d/%d)" % (faceCount, facesNumber)) 
       
       # Get x_min, y_min, x_max, y_max, conf
       x_min = det.rect.left()
@@ -144,7 +171,11 @@ class FaceDetector():
       img = self.transformations(img)
       img_shape = img.size()
       img = img.view(1, img_shape[0], img_shape[1], img_shape[2])
-      img = Variable(img).cuda(self.gpuId)
+      
+      if self.deviceType == 'cuda':
+        img = Variable(img).cuda(self.device)
+      else:
+        img = Variable(img).cpu()
 
       # get 3d orientation of the face
       yaw, pitch, roll = self.hopenetModel(img)
@@ -161,4 +192,5 @@ class FaceDetector():
       # save data
       res.append(Face(conf, x_min, x_max, y_min, y_max, yaw_predicted, pitch_predicted, roll_predicted))
 
+    print("Face Detector Time:", timeit.default_timer() - startTime)
     return res
