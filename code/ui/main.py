@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'main.ui'
+# Form implementation generated from reading ui file './ui/main.ui'
 #
 # Created by: PyQt5 UI code generator 5.10.1
 #
@@ -46,16 +46,14 @@ class Ui_MainWindow(object):
         self.VideoWidget.setResizeAnchor(QtWidgets.QGraphicsView.AnchorViewCenter)
         self.VideoWidget.setObjectName("VideoWidget")
         self.horizontalLayout.addWidget(self.VideoWidget)
-        self.openGLWidget = QtWidgets.QOpenGLWidget(self.frame)
+        self.GLWidget = QtWidgets.QGraphicsView(self.frame)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(50)
-        sizePolicy.setVerticalStretch(100)
-        sizePolicy.setHeightForWidth(self.openGLWidget.sizePolicy().hasHeightForWidth())
-        self.openGLWidget.setSizePolicy(sizePolicy)
-        self.openGLWidget.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.openGLWidget.setAcceptDrops(True)
-        self.openGLWidget.setObjectName("openGLWidget")
-        self.horizontalLayout.addWidget(self.openGLWidget)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.GLWidget.sizePolicy().hasHeightForWidth())
+        self.GLWidget.setSizePolicy(sizePolicy)
+        self.GLWidget.setObjectName("GLWidget")
+        self.horizontalLayout.addWidget(self.GLWidget)
         self.gridViewerLayout.addWidget(self.frame, 0, 0, 1, 1)
         self.gridLayout.addLayout(self.gridViewerLayout, 0, 0, 1, 1)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
@@ -334,7 +332,7 @@ class Ui_MainWindow(object):
         self.actionOpen_video.setText(_translate("MainWindow", "Open video..."))
         self.actionOpen_model.setText(_translate("MainWindow", "Open model..."))
 
-from ui import icons_rc
+from PyQt5 import icons_rc
 
 if __name__ == "__main__":
     import sys

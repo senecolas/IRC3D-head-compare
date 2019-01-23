@@ -45,6 +45,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.setupUi(self)
     self.isPlaying = False
     self.isVideoLoaded = False
+    self.isModelData = False
     self.isLoadedData = False
     self.ifDrawAxis = False
     self.ifDrawSquare = False
@@ -402,28 +403,33 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     #torch.no_grad()
 
   def initGL(self):
-    mesh = Wavefront('../face orientation/visage.obj')
-    viewport = (1600,900)
-    window = pyglet.window.Window(viewport[0],viewport[1], caption='Mesh orientation', resizable=True)
-    lightfv = ctypes.c_float * 4
-    rx, ry, rz = (0,0,0)
+    self.mesh = Wavefront('../face orientation/visage.obj')
+    self.isModelLoaded = True
+    self.glViewport = (1600,900)
+    self.glWindow = pyglet.window.Window(1600,900, caption='Mesh orientation', resizable=True)
+    self.lightfv = ctypes.c_float * 4
+    self.rx, self.ry, self.rz = (0,0,0)
 
-    window.set_visible(False)
+    self.glWindow.set_visible(False)
 
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    width, height = viewport
-    gluPerspective(90.0, width/float(height), 1, 100.0)
+    self.width, self.height = self.glViewport
+    gluPerspective(90.0, self.width/float(self.height), 1, 100.0)
     glEnable(GL_DEPTH_TEST)
     glMatrixMode(GL_MODELVIEW)
 
   def getGLFrame(self):
-    window.clear()
+
+    if self.isModelLoaded == False:
+      return
+
+    self.glWindow.clear()
     glLoadIdentity()
 
-    glLightfv(GL_LIGHT0, GL_POSITION, lightfv(-40.0, 200.0, 100.0, 0.0))
-    glLightfv(GL_LIGHT0, GL_AMBIENT, lightfv(0.2, 0.2, 0.2, 1.0))
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, lightfv(0.5, 0.5, 0.5, 1.0))
+    glLightfv(GL_LIGHT0, GL_POSITION, self.lightfv(-40.0, 200.0, 100.0, 0.0))
+    glLightfv(GL_LIGHT0, GL_AMBIENT, self.lightfv(0.2, 0.2, 0.2, 1.0))
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, self.lightfv(0.5, 0.5, 0.5, 1.0))
     glEnable(GL_LIGHT0)
     glEnable(GL_LIGHTING)
 
@@ -435,13 +441,34 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
 
     # Rotations for sphere on axis - useful
     glTranslated(0, 0, -2)
-    glRotatef(ry, 1, 0, 0)
-    glRotatef(rx, 0, 1, 0)
-    glRotatef(rz, 0, 0, 1)
+    glRotatef(self.ry, 1, 0, 0)
+    glRotatef(self.rx, 0, 1, 0)
+    glRotatef(self.rz, 0, 0, 1)
 
-    visualization.draw(mesh)
+    visualization.draw(self.mesh)
 
     return pyglet.image.get_buffer_manager().get_color_buffer()
+
+  def drawGLFrame(self):
+
+    frame = self.getGLFrame();
+
+    # convert cv2 video to QPixmap
+    rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    convertToQtFormat = QtGui.QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0], QtGui.QImage.Format_RGB888)
+    convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
+    pixmap = QtGui.QPixmap(convertToQtFormat)
+    
+    # Resize with zoom
+    pixmap = pixmap.scaled(self.maxWidth * self.zoom, self.maxHeight * self.zoom, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+    
+    # Add image
+    scene = QtWidgets.QGraphicsScene() 
+    scene.addItem(QtWidgets.QGraphicsPixmapItem(pixmap))
+    self.VideoWidget.setScene(scene) 
+    
+    #Center on the appropriate position
+    self.VideoWidget.centerOn(self.centerX, self.centerY)
 
 if __name__ == '__main__':
   args = parse_args()
