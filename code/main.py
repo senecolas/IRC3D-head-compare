@@ -249,12 +249,13 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
       self.saveCacheFile()
       self.updateInfo()
       self.updateProcessTable(self.currentFrame-1)
-      self.updateProgressDialog(1.0, "End of the faces calculation")
     except:
       print("stopped getHeadPosition")
       
     # Redraw the frame
     self.drawFrame()
+    
+    self.updateProgressDialog(1.0, "End of the faces calculation")
     
     # return 
     return self.getCurrentCacheData()
