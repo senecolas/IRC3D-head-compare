@@ -408,7 +408,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.glViewport = (1600,900)
     self.glWindow = pyglet.window.Window(1600,900, caption='Mesh orientation', resizable=True)
     self.lightfv = ctypes.c_float * 4
-    self.rx, self.ry, self.rz = (0,0,0)
+    self.rx, self.ry, self.rz = (0, 0, 0)
 
     self.glWindow.set_visible(False)
 
@@ -441,9 +441,9 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
 
     # Rotations for sphere on axis - useful
     glTranslated(0, 0, -5)
-    glRotatef(self.ry, 1, 0, 0)
-    glRotatef(self.rx, 0, 1, 0)
-    glRotatef(self.rz, 0, 0, 1)
+    glRotatef(10, 1, 0, 0)
+    glRotatef(2, 0, 1, 0)
+    glRotatef(30, 0, 0, 1)
 
     visualization.draw(self.mesh)
 
@@ -463,7 +463,15 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
 
     pixmap = QtGui.QPixmap(convertToQtFormat)
+
+    # Resize with zoom
+    pixmap = pixmap.scaled(self.maxWidth * self.zoom, self.maxHeight * self.zoom, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
     
+    # Rotate the pixmap
+    rm = QtGui.QTransform()
+    rm.scale(1,-1)
+    pixmap = pixmap.transformed(rm)
+
     # Add image
     scene = QtWidgets.QGraphicsScene() 
     scene.addItem(QtWidgets.QGraphicsPixmapItem(pixmap))
