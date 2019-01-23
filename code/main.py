@@ -496,7 +496,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
         facesInfo = str(faceNumber) + " face(s) detected"
         self.facesInfo.setStyleSheet("color: rgb(0, 153, 0);")
       else:
-        facesInfo = "No faces were detected"
+        facesInfo = "No face was detected"
         self.facesInfo.setStyleSheet("color: rgb(255, 102, 0);")
     else:
       facesInfo = "Frame not process"
