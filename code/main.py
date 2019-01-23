@@ -447,15 +447,19 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
 
     visualization.draw(self.mesh)
 
-    pyglet.image.get_buffer_manager().get_color_buffer().save('screenshot.png')
+    # pyglet.image.get_buffer_manager().get_color_buffer().save('screenshot.png')
 
-    rgbImage = pyglet.image.get_buffer_manager().get_color_buffer()
+    return pyglet.image.get_buffer_manager().get_color_buffer()
+
+  def drawGLFrame(self):
+
+    rgbImage = self.getGLFrame()
 
     print(rgbImage.get_image_data().width)
     print(rgbImage.get_image_data().height)
 
     convertToQtFormat = QtGui.QImage(rgbImage.get_image_data().data, rgbImage.get_image_data().width, rgbImage.get_image_data().height, QtGui.QImage.Format_RGBA8888_Premultiplied)
-    convertToQtFormat.save('qImage_screenshot.png')
+    # convertToQtFormat.save('qImage_screenshot.png')
     convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
 
     pixmap = QtGui.QPixmap(convertToQtFormat)
@@ -467,10 +471,6 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     
     #Center on the appropriate position
     self.GLWidget.centerOn(self.centerX, self.centerY)
-
-  def drawGLFrame(self):
-
-    self.getGLFrame()
     
 
 if __name__ == '__main__':
