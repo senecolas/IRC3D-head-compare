@@ -81,6 +81,7 @@ class Ui_MainWindow(object):
         self.videoProcessTable.setDragDropOverwriteMode(False)
         self.videoProcessTable.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)
         self.videoProcessTable.setTextElideMode(QtCore.Qt.ElideNone)
+        self.videoProcessTable.setShowGrid(False)
         self.videoProcessTable.setGridStyle(QtCore.Qt.SolidLine)
         self.videoProcessTable.setRowCount(1)
         self.videoProcessTable.setColumnCount(1)
