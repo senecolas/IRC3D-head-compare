@@ -220,9 +220,10 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
   def processAllVideo(self):
     """ Launch the getHeadPosition function for all frame from the current frame """
     for i in range(self.currentFrame, self.frameCount + 1):
-      self.getHeadPosition()
-      if self.faceDetector.isStopped() :
-        break
+      if self.getCurrentCacheData()['isLoaded'] == False:
+        self.getHeadPosition()
+        if self.faceDetector.isStopped() :
+          break
       self.drawNextFrame()
     
 
