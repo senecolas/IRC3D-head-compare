@@ -440,26 +440,25 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     glMatrixMode(GL_MODELVIEW)
 
     # Rotations for sphere on axis - useful
-    glTranslated(0, 0, -2)
+    glTranslated(0, 0, -5)
     glRotatef(self.ry, 1, 0, 0)
     glRotatef(self.rx, 0, 1, 0)
     glRotatef(self.rz, 0, 0, 1)
 
     visualization.draw(self.mesh)
 
-    print('ok1')
     pyglet.image.get_buffer_manager().get_color_buffer().save('screenshot.png')
-    print('ok2')
 
     rgbImage = pyglet.image.get_buffer_manager().get_color_buffer()
 
-    convertToQtFormat = QtGui.QImage(rgbImage.get_image_data().data, rgbImage.get_image_data().width, rgbImage.get_image_data().height, QtGui.QImage.Format_RGB888)
+    print(rgbImage.get_image_data().width)
+    print(rgbImage.get_image_data().height)
+
+    convertToQtFormat = QtGui.QImage(rgbImage.get_image_data().data, rgbImage.get_image_data().width, rgbImage.get_image_data().height, QtGui.QImage.Format_RGBA8888_Premultiplied)
+    convertToQtFormat.save('qImage_screenshot.png')
     convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
 
     pixmap = QtGui.QPixmap(convertToQtFormat)
-    
-    # Resize with zoom
-    pixmap = pixmap.scaled(self.maxWidth * self.zoom, self.maxHeight * self.zoom, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
     
     # Add image
     scene = QtWidgets.QGraphicsScene() 
