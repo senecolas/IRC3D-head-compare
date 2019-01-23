@@ -218,7 +218,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.loadProcessTable()
     
     # we draw the first frame
-    self.setFrame(0) 
+    self.setFrame(0)
     
   def loadProcessTable(self):
     self.videoProcessTable.setColumnCount(self.frameCount)
@@ -319,7 +319,9 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     # Add image
     scene = QtWidgets.QGraphicsScene() 
     scene.addItem(QtWidgets.QGraphicsPixmapItem(pixmap))
-    self.VideoWidget.setScene(scene) 
+    self.VideoWidget.setScene(scene)
+
+    self.drawGLFrame()
     
     #Center on the appropriate position
     self.VideoWidget.centerOn(self.centerX, self.centerY)
@@ -454,9 +456,6 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
   def drawGLFrame(self):
 
     rgbImage = self.getGLFrame()
-
-    print(rgbImage.get_image_data().width)
-    print(rgbImage.get_image_data().height)
 
     convertToQtFormat = QtGui.QImage(rgbImage.get_image_data().data, rgbImage.get_image_data().width, rgbImage.get_image_data().height, QtGui.QImage.Format_RGBA8888_Premultiplied)
     # convertToQtFormat.save('qImage_screenshot.png')
