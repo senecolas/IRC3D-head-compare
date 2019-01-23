@@ -77,7 +77,10 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.VideoWidget.mousePressEvent = self.mousePressEvent
     self.VideoWidget.mouseReleaseEvent = self.mouseReleaseEvent
     self.VideoWidget.mouseMoveEvent = self.mouseMoveEvent
+    
+    # RESIZE EVENT
     self.VideoWidget.resizeEvent = self.resizeEvent
+    self.videoProcessTable.resizeEvent = self.resizeProcessTable
 
 
   
@@ -116,11 +119,26 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
       self.centerY = event.pos().y() * self.zoom
     self.drawFrame() #we redraw the frame
 
-
-
   #################################
   ### ==== EVENTS ON MENU  ==== ###
   #################################
+  
+  def resizeProcessTable(self, event=None):
+    if self.isVideoLoaded == False:
+      return
+    width = self.videoProcessTable.frameGeometry().width()
+    cellWidth = width / (self.frameCount - 1)
+    halfCellWidth = width / (self.frameCount * 2.)
+    rest = 0.
+    for i in range(1, self.frameCount - 1):
+      realCellWidth = cellWidth + rest
+      rest = realCellWidth % 1
+      self.videoProcessTable.setColumnWidth(i, realCellWidth)
+    # we reduce by half the first and last cell to match with the slider below
+    self.videoProcessTable.setColumnWidth(0, halfCellWidth)
+    self.videoProcessTable.setColumnWidth(self.frameCount - 1, halfCellWidth)
+    print("width", width)
+    print("cellWidth", cellWidth)
   
   def resizeEvent(self, event):
     """ Event call at each resize. Resize the window and update the VideoWidget """
@@ -222,7 +240,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     for i in range(self.currentFrame, self.frameCount + 1):
       if self.getCurrentCacheData()['isLoaded'] == False:
         self.getHeadPosition()
-        if self.faceDetector.isStopped() :
+        if self.faceDetector.isStopped():
           break
       self.drawNextFrame()
     
@@ -383,12 +401,11 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
   def initProcessTable(self):
     """ Create the process table according to the video (the colored table that shows the loaded frames below the video) """
     self.videoProcessTable.setColumnCount(self.frameCount)
-    self.videoProcessTable.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
     for i in range(self.frameCount):
       item = QtWidgets.QTableWidgetItem()
       self.videoProcessTable.setItem(0, i, item)
       self.updateProcessTable(i)
-        
+    self.resizeProcessTable()
     
   def loadCacheFile(self):
     """ Load the cache file of the video or create it if it does not exist """
