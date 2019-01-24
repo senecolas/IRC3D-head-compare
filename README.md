@@ -6,7 +6,7 @@ This software is part of a research thesis of the Criminal Investigation Institu
 It is based on the head pose detection in deep lerning [Hopenet](https://github.com/natanielruiz/deep-head-pose), by Nataniel Ruiz, Eunji Chong, James M. Rehg from Georgia Institute of Technology.
 
 ## Launch the application
-To launch the application you have to start the main.py in the code folder
+To launch the application you have to start the `main.py` in the code folder
 ```
 cd code/
 python3 main.py
@@ -18,13 +18,13 @@ python3 main.py --config [MY_CONFIG_PATH]
 ```
 
 ## Configuration
-You can configure the application from the json file 'config.json'
-* 'snapshot' path of the Hopenet trained model to use to calculate the orientation of the face (.pkl)
-* 'face_model' path of the dlib face detections model (.dat)
-* 'gpu_id' the identifier of the GPU to use by default (if no gpu is detected, the cpu will be used)
-* 'cache_string' text at the end of the video name for its json cache file
-* 'video_formats' table of all videos formats that can be opened with the application (you must have the codecs to read these files)
-* 'mesh_formats' table of all 3D mesh formats that can be opened with the application 
+You can configure the application from the json file `config.json`
+* `snapshot` path of the Hopenet trained model to use to calculate the orientation of the face (.pkl)
+* `face_model` path of the dlib face detections model (.dat)
+* `gpu_id` the identifier of the GPU to use by default (if no gpu is detected, the cpu will be used)
+* `cache_string` text at the end of the video name for its json cache file
+* `video_formats` table of all videos formats that can be opened with the application (you must have the codecs to read these files)
+* `mesh_formats` table of all 3D mesh formats that can be opened with the application 
 
 ## Required libraries
 
