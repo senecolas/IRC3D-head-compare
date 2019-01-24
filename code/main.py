@@ -52,6 +52,8 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.zoom = 1.
     self.mousePos = QtCore.QPointF(0, 0)
     self.output_path = "output.txt"
+    self.videoFormats = []
+    self.meshFormats = []
     
     # PUSH BUTTONS EVENTS
     self.read_PB.clicked.connect(lambda: self.play())
@@ -183,14 +185,18 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     
   def selectVideo(self):
     """ Event call at each click on actionOpen_video. Opens a video selection window and load the selected video """
-    fileName = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Video')[0]
-    self.loadVideo(str(fileName))
+    fileFilter = "*." + " *.".join(self.videoFormats)
+    fileName = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Video', '../', "Video Files (%s)" % (fileFilter))[0]
+    if fileName != '':
+      self.loadVideo(str(fileName))
   
   
   def selectModel(self):
     """ Event call at each click on actionOpen_model. Opens a mesh selection window and load the selected mesh """
-    fileName = QtWidgets.QFileDialog.getOpenFileName(self, 'Select 3D Model')[0]
-    self.loadModel(str(fileName))
+    fileFilter = "*." + " *.".join(self.meshFormats)
+    fileName = QtWidgets.QFileDialog.getOpenFileName(self, 'Select 3D Model', '../', "3D Model (%s)" % (fileFilter))[0]
+    if fileName != '':
+      self.loadModel(str(fileName))
 
 
 
@@ -360,6 +366,8 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
       self.gpu_id = data['gpu_id']   
       self.conf_threshold = data['conf_threshold']
       self.cache_string = data['cache_string']
+      self.videoFormats = data['video_formats']
+      self.meshFormats = data['mesh_formats']
       
     self.loadFaceDetector()
     self.confidenceSlider.setValue(self.conf_threshold * 100)
@@ -405,7 +413,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
 
   def initProcessTable(self):
     """ Create the process table according to the video (the colored table that shows the loaded frames below the video) """
-    if self.frameCount > 30000 : # if the number of frames is too many, we mask the process table
+    if self.frameCount > 30000: # if the number of frames is too many, we mask the process table
       self.videoProcessTable.hide()
       return 
     self.videoProcessTable.show()

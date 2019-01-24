@@ -3,5 +3,7 @@
   "face_model": "../models/mmod_human_face_detector.dat",
   "gpu_id": 0,
   "conf_threshold": 0.75,
-  "cache_string": ".irc-cache"
+  "cache_string": ".irc-cache",
+  "video_formats": ["avi", "amv", "asf", "drc", "flv", "flv", "flv", "f4v", "f4p", "f4a", "f4b", "m4v", "mkv", "mng", "mov", "qt", "mp4", "m4p", "m4v", "mpg", "mp2", "mpeg", "mpe", "mpv", "mpg", "mpeg", "m2v", "MTS", "M2TS", "mxf", "nsv", "ogv", "ogg", "rm", "rmvb", "roq", "svi", "vob", "webm", "wmv", "yuv", "3g2", "3gp"],
+  "mesh_formats": ["obj"]
 }
