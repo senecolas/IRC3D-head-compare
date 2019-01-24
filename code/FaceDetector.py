@@ -119,8 +119,11 @@ class FaceDetector():
       callback(0.01, "Dlib face detection (this may be long)") 
 
     # Dlib face detection
-    dets = self.cnnFaceDetector(cv2_frame, 1)
-
+    try :
+      dets = self.cnnFaceDetector(cv2_frame, 1) # 1 is the number of times it should upsample the image (helps to detect smaller faces)
+    except :
+      dets = self.cnnFaceDetector(cv2_frame, 0) # when upsample does not work
+      
     if self.isStop: 
       raise
     if callback != None:
