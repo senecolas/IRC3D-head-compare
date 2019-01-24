@@ -41,7 +41,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.currentFrame = 0
     self.isDragging = False
     self.faceDetector = None
-    self.progressDialog = None
+    self.progressDialog = QtWidgets.QProgressDialog("Loading...", "Stop", 0, 100, self)
     self.lastUpdate = 0
     self.conf_threshold = 0.75
     self.maxWidth = self.VideoWidget.geometry().width()
@@ -137,8 +137,6 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     # we reduce by half the first and last cell to match with the slider below
     self.videoProcessTable.setColumnWidth(0, halfCellWidth)
     self.videoProcessTable.setColumnWidth(self.frameCount - 1, halfCellWidth)
-    print("width", width)
-    print("cellWidth", cellWidth)
   
   def resizeEvent(self, event):
     """ Event call at each resize. Resize the window and update the VideoWidget """
@@ -239,13 +237,13 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     """ Launch the getHeadPosition function for all frame from the current frame """
     for i in range(self.currentFrame, self.frameCount + 1):
       if self.getCurrentCacheData()['isLoaded'] == False:
-        self.getHeadPosition()
+        self.getHeadPosition(False)
         if self.faceDetector.isStopped():
           break
       self.drawNextFrame()
     
 
-  def getHeadPosition(self):
+  def getHeadPosition(self, endProgressDialog = True):
     """ Launch the calculation to get the faces of the current frame and saves it in the cache file """
     
     if(self.isVideoLoaded == False):
@@ -274,7 +272,8 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     # Redraw the frame
     self.drawFrame()
     
-    self.updateProgressDialog(1.0, "End of the faces calculation")
+    if endProgressDialog :
+      self.updateProgressDialog(1.0, "End of the faces calculation")
     
     # return 
     return self.getCurrentCacheData()
@@ -320,13 +319,16 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
   
   def setProgressDialog(self, title="Traitement", stopCallback=None):
     """ Create the QProgressDialog and show it """
-    self.progressDialog = QtWidgets.QProgressDialog(title, "Stop", 0, 100, self)
+    #self.progressDialog = QtWidgets.QProgressDialog(title, "Stop", 0, 100, self)
     self.progressDialog.setWindowTitle(title)
     self.progressDialog.setMinimumWidth(400)
+    button = self.progressDialog.findChildren(QtWidgets.QPushButton)[0] #get cancel button
     if stopCallback != None:
+      button.show()
       self.progressDialog.canceled.connect(stopCallback)
     else:
-      self.progressDialog.setCancelButton(None)
+      button.hide()
+      #self.progressDialog.setCancelButton(None)
     self.progressDialog.show()
 
 
