@@ -13,6 +13,7 @@ import time
 import timeit
 from ui import main
 import utils
+from utils import debounce
 
 # python3 code/main.py --video ./videos/CCTV_1.mp4 --output ./output/output.txt
 
@@ -122,21 +123,23 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
   #################################
   ### ==== EVENTS ON MENU  ==== ###
   #################################
-  
+
+  @debounce(0.1)
   def resizeProcessTable(self, event=None):
     if self.isVideoLoaded == False:
       return
     width = self.videoProcessTable.frameGeometry().width()
-    cellWidth = width / (self.frameCount - 1)
     halfCellWidth = width / (self.frameCount * 2.)
+    cellWidth = width / (self.frameCount - 1)
     rest = 0.
     for i in range(1, self.frameCount - 1):
       realCellWidth = cellWidth + rest
       rest = realCellWidth % 1
       self.videoProcessTable.setColumnWidth(i, realCellWidth)
     # we reduce by half the first and last cell to match with the slider below
-    self.videoProcessTable.setColumnWidth(0, halfCellWidth)
-    self.videoProcessTable.setColumnWidth(self.frameCount - 1, halfCellWidth)
+    self.videoProcessTable.setColumnWidth(self.frameCount - 1, math.floor(halfCellWidth))
+    self.videoProcessTable.setColumnWidth(0, math.ceil(halfCellWidth))
+
   
   def resizeEvent(self, event):
     """ Event call at each resize. Resize the window and update the VideoWidget """
@@ -243,7 +246,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
       self.drawNextFrame()
     
 
-  def getHeadPosition(self, endProgressDialog = True):
+  def getHeadPosition(self, endProgressDialog=True):
     """ Launch the calculation to get the faces of the current frame and saves it in the cache file """
     
     if(self.isVideoLoaded == False):
@@ -272,7 +275,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     # Redraw the frame
     self.drawFrame()
     
-    if endProgressDialog :
+    if endProgressDialog:
       self.updateProgressDialog(1.0, "End of the faces calculation")
     
     # return 
@@ -402,6 +405,10 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
 
   def initProcessTable(self):
     """ Create the process table according to the video (the colored table that shows the loaded frames below the video) """
+    if self.frameCount > 30000 : # if the number of frames is too many, we mask the process table
+      self.videoProcessTable.hide()
+      return 
+    self.videoProcessTable.show()
     self.videoProcessTable.setColumnCount(self.frameCount)
     for i in range(self.frameCount):
       item = QtWidgets.QTableWidgetItem()
