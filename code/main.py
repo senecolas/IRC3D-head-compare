@@ -364,7 +364,6 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
       self.snapshot = data['snapshot']
       self.face_model = data['face_model']
       self.gpu_id = data['gpu_id']   
-      self.conf_threshold = data['conf_threshold']
       self.cache_string = data['cache_string']
       self.videoFormats = data['video_formats']
       self.meshFormats = data['mesh_formats']
