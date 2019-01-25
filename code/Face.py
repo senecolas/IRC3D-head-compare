@@ -1,4 +1,4 @@
-# face.py
+# Face.py
 # Face class and functions
 
 import cv2

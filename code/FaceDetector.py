@@ -1,3 +1,8 @@
+"""
+FaceDetector.py
+Faces detection management class
+""" 
+
 from Face import Face
 from PIL import Image
 import cv2
@@ -12,17 +17,20 @@ import torch.backends.cudnn as cudnn
 import torchvision
 from torchvision import transforms
 
-"""
-FaceDetector.py
-Faces detection management class
-""" 
 
 class FaceDetector():
   def __init__(self, faceModelPath, snapshotPath, gpuID=None):
+    """ 
+    Constructor of the FaceDetector
+      - 'faceModelPath' is path of the dlib face detections model (.dat)
+      - 'snapshotPath' is the path of the Hopenet trained model to use to calculate the orientation of the face (.pkl)
+      - 'gpuID' is the identifier of the GPU to use by default (if no gpu is detected, the cpu will be used)
+    """
     self.gpuId = gpuID
     self.deviceType = 'cuda'
     self.faceModelPath = faceModelPath
     self.snapshotPath = snapshotPath
+    self.confThreshold = 0.75
     self.isLoadedData = False
     self.hopenetModel = None
     self.cnnFaceDetector = None
