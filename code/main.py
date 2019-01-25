@@ -104,13 +104,19 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     
   def wheelEvent(self, event):
     """ Event call at each mouse wheel action on videoSlider. Zoom, change the center and redraw the frame """
+    x = event.pos().x()
+    y = event.pos().y()
+    
+    if x > self.maxWidth : # if we are on the second screen
+      x -= self.maxWidth
+      
     self.zoom = utils.clamp(1., self.zoom + event.angleDelta().y() * 0.002, 20.)
     if(self.zoom == 1):
       self.centerX = self.maxWidth / 2. # center of the video
       self.centerY = self.maxHeight / 2.
     else:
-      self.centerX = event.pos().x() * self.zoom
-      self.centerY = event.pos().y() * self.zoom
+      self.centerX = x * self.zoom
+      self.centerY = y * self.zoom
     self.draw() #we redraw the frame
 
 
