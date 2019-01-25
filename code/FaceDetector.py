@@ -102,7 +102,6 @@ class FaceDetector():
 
     # Test the Model
     self.hopenetModel.eval()  # Change model to 'eval' mode (BN uses moving mean/var).
-    #torch.no_grad()
 
   def stop(self):
     """ Stop the frame calculation """
