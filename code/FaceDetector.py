@@ -10,8 +10,8 @@ import datasets
 import dlib
 import dlib.cuda as cuda
 from hopenet import *
-import timeit
 import time
+import timeit
 import torch
 import torch.backends.cudnn as cudnn
 import torchvision
@@ -46,8 +46,11 @@ class FaceDetector():
         self.gpuId = torch.cuda.current_device()
       self.device = torch.device('cuda:%d' % (self.gpuId))
       cudnn.enabled = True
+
       # CUDA INFO
       print(torch.cuda.get_device_name(self.gpuId))
+      if dlib.DLIB_USE_CUDA == False:
+        print("Your installation of dlib does not use cuda, the face detection will use the CPU. To reinstall dlib with cuda, refer to the installation instructions.")
       
     else: # CUDA is not available or gpuId = -1 (force CPU), use CPU
       self.deviceType = 'cpu'
@@ -127,9 +130,9 @@ class FaceDetector():
       callback(0.01, "Dlib face detection (this may be long)") 
 
     # Dlib face detection
-    try :
+    try:
       dets = self.cnnFaceDetector(cv2_frame, 1) # 1 is the number of times it should upsample the image (helps to detect smaller faces)
-    except :
+    except:
       dets = self.cnnFaceDetector(cv2_frame, 0) # when upsample does not work
       
     if self.isStop: 
