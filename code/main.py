@@ -405,7 +405,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     #torch.no_grad()
 
   def initGL(self):
-    self.mesh = Wavefront('../face orientation/visage.obj')
+    self.mesh = Wavefront('../face orientation/FinalExport.obj')
     self.isModelLoaded = True
     self.glViewport = (1600,900)
     self.glWindow = pyglet.window.Window(1600,900, caption='Mesh orientation', resizable=True)
@@ -417,9 +417,37 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     self.width, self.height = self.glViewport
-    gluPerspective(90.0, self.width/float(self.height), 1, 100.0)
+    gluPerspective(20.0, self.width/float(self.height), 1, 100.0)
     glEnable(GL_DEPTH_TEST)
     glMatrixMode(GL_MODELVIEW)
+
+  def drawMesh(self):
+    yaw, pitch, roll = (0,0,0)
+    x, y, z = (0.2,-2,0)
+
+    # Transforms : comparisons between face bounding boxes( on the video) and the bounding box of the face on OpenGL render --> y position : we move the mesh back until bounding boxes are "almost even"
+    # then we move the mesh on x and z axes to make the bounding box at the same pos
+    # BUT --> this involve a bounding box on the pixmap frame wich follox the face
+
+    # Reset previous matrix transformations
+    glLoadIdentity()
+
+    # Rotations for sphere on axis - useful
+    glTranslated(x, z, y)
+    glRotatef(-pitch, 1, 0, 0)
+    glRotatef(roll, 0, 1, 0)
+    glRotatef(-yaw, 0, 0, 1)
+
+    visualization.draw(self.mesh)
+
+    glLoadIdentity()
+
+    glTranslated(-x, z, y)
+    glRotatef(-pitch, 1, 0, 0)
+    glRotatef(roll, 0, 1, 0)
+    glRotatef(-yaw, 0, 0, 1)
+
+    visualization.draw(self.mesh)
 
   def getGLFrame(self):
 
@@ -429,9 +457,9 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.glWindow.clear()
     glLoadIdentity()
 
-    glLightfv(GL_LIGHT0, GL_POSITION, self.lightfv(-40.0, 200.0, 100.0, 0.0))
-    glLightfv(GL_LIGHT0, GL_AMBIENT, self.lightfv(0.2, 0.2, 0.2, 1.0))
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, self.lightfv(0.5, 0.5, 0.5, 1.0))
+    glLightfv(GL_LIGHT0, GL_POSITION, self.lightfv(-20.0, 50.0, 25.0, 0.0))
+    glLightfv(GL_LIGHT0, GL_AMBIENT, self.lightfv(0.5, 0.5, 0.5, 1.0))
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, self.lightfv(0.8, 0.8, 0.8, 1.0))
     glEnable(GL_LIGHT0)
     glEnable(GL_LIGHTING)
 
@@ -441,13 +469,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
 
     glMatrixMode(GL_MODELVIEW)
 
-    # Rotations for sphere on axis - useful
-    glTranslated(0, 0, -5)
-    glRotatef(10, 1, 0, 0)
-    glRotatef(2, 0, 1, 0)
-    glRotatef(30, 0, 0, 1)
-
-    visualization.draw(self.mesh)
+    self.drawMesh()
 
     # pyglet.image.get_buffer_manager().get_color_buffer().save('screenshot.png')
 
