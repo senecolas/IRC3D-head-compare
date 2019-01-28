@@ -39,7 +39,7 @@ class MeshManager():
   #################################
 
   def load(self, filename):
-    self.mesh = Wavefront('../face orientation/FinalExport.obj')
+    self.mesh = Wavefront(filename)
     
   def initGL(self):
     self.isModelLoaded = True
@@ -106,7 +106,6 @@ class MeshManager():
     rgbImage = pyglet.image.get_buffer_manager().get_color_buffer()
 
     # Convert ColorBuffer to Pixmap
-
     convertToQtFormat = QtGui.QImage(rgbImage.get_image_data().data, rgbImage.get_image_data().width, rgbImage.get_image_data().height, QtGui.QImage.Format_RGBA8888_Premultiplied)
     # convertToQtFormat.save('qImage_screenshot.png')
     convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
