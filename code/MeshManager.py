@@ -110,6 +110,11 @@ class MeshManager():
 
     pixmap = QtGui.QPixmap(convertToQtFormat)
 
+    # Mirror the pixmap (because of an gorizontal "mirror effect" during convert)
+    sm = QtGui.QTransform()
+    sm.scale(1,-1)
+    pixmap = pixmap.transformed(sm)
+
     return pixmap
       
 
@@ -133,3 +138,5 @@ class MeshManager():
     glRotatef(-pitch, 1, 0, 0)
     glRotatef(roll, 0, 1, 0)
     glRotatef(-yaw, 0, 0, 1)
+
+    visualization.draw(self.mesh)
