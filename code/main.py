@@ -321,7 +321,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.initProcessTable()
     
     # we draw the first frame
-    self.drawVideo() 
+    self.draw() 
 
 
   def initProcessTable(self):
