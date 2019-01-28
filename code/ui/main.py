@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created by: PyQt5 UI code generator 5.10.1
+# Created by: PyQt5 UI code generator 5.11.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1003, 483)
+        MainWindow.resize(1048, 443)
         MainWindow.setMinimumSize(QtCore.QSize(800, 350))
         self.MainWindows = QtWidgets.QWidget(MainWindow)
         self.MainWindows.setObjectName("MainWindows")
@@ -53,6 +53,12 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(100)
         sizePolicy.setHeightForWidth(self.GLWidget.sizePolicy().hasHeightForWidth())
         self.GLWidget.setSizePolicy(sizePolicy)
+        self.GLWidget.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.GLWidget.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        self.GLWidget.setBackgroundBrush(brush)
+        self.GLWidget.setResizeAnchor(QtWidgets.QGraphicsView.AnchorViewCenter)
         self.GLWidget.setObjectName("GLWidget")
         self.horizontalLayout.addWidget(self.GLWidget)
         self.gridViewerLayout.addWidget(self.frame, 0, 0, 1, 1)
@@ -304,7 +310,7 @@ class Ui_MainWindow(object):
         self.gridLayout.addLayout(self.bottomButtons, 3, 0, 1, 1)
         MainWindow.setCentralWidget(self.MainWindows)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1003, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1048, 21))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")

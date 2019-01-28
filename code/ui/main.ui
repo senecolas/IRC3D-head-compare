@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1003</width>
-    <height>483</height>
+    <width>1048</width>
+    <height>443</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -103,6 +103,24 @@
              <horstretch>50</horstretch>
              <verstretch>100</verstretch>
             </sizepolicy>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="backgroundBrush">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>0</red>
+              <green>0</green>
+              <blue>0</blue>
+             </color>
+            </brush>
+           </property>
+           <property name="resizeAnchor">
+            <enum>QGraphicsView::AnchorViewCenter</enum>
            </property>
           </widget>
          </item>
@@ -659,8 +677,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1003</width>
-     <height>22</height>
+     <width>1048</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
