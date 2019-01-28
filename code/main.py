@@ -356,10 +356,11 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     # update the processTable
     self.updateProcessTable(index - 1)
 
-  def drawMesh(self):
+  def drawGL(self):
+    # get faces
+    faces = self.videoManager.faces()
     # get the mesh frame
-    pixmap = self.meshManager.frame()
-
+    pixmap = self.meshManager.frame(faces)
     # draw it
     self.drawOn(pixmap, self.GLWidget)
     
@@ -368,7 +369,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     if self.videoManager.isLoaded() == False:
       return
     self.drawVideo()
-    self.drawMesh()
+    self.drawGL()
     self.updateInfo()
     
   def drawOn(self, pixmap, widget):

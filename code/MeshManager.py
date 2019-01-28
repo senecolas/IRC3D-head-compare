@@ -75,7 +75,7 @@ class MeshManager():
   # Meshes positionning on the 3d scene
   # FOV management (slide bar)
 
-  def frame(self):
+  def frame(self, faces):
 
     if self.isModelLoaded == False:
       return
@@ -95,7 +95,10 @@ class MeshManager():
 
     glMatrixMode(GL_MODELVIEW)
 
-    self.drawMesh()
+    cpt = 0
+    for face in faces:
+      self.drawMesh(face, cpt)
+      cpt += 0.1
 
     # To check color buffer (then compare it with the pixmap after conversion) #
     # pyglet.image.get_buffer_manager().get_color_buffer().save('screenshot.png')
@@ -122,8 +125,7 @@ class MeshManager():
   ### ====     DRAWING     ==== ###
   #################################
 
-  def drawMesh(self):
-    yaw, pitch, roll = (0,0,0)
+  def drawMesh(self, face, cpt):
     x, y, z = (0,-2,0)
 
     # Transforms : comparisons between face bounding boxes( on the video) and the bounding box of the face on OpenGL render --> y position : we move the mesh back until bounding boxes are "almost even"
@@ -135,8 +137,8 @@ class MeshManager():
 
     # Rotations for sphere on axis - useful
     glTranslated(x, z, y)
-    glRotatef(-pitch, 1, 0, 0)
-    glRotatef(roll, 0, 1, 0)
-    glRotatef(-yaw, 0, 0, 1)
+    glRotatef(-face.pitch, 1, 0, 0) # sounds like pitch on x axis -> red on the schema
+    glRotatef(-face.yaw, 0, 1, 0) # sounds like yaw on z axis -> green on schema
+    glRotatef(-face.roll, 0, 0, 1) # sounds like roll on y axis -> blue on schema
 
     visualization.draw(self.mesh)
