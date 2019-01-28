@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created by: PyQt5 UI code generator 5.11.3
+# Created by: PyQt5 UI code generator 5.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 350)
+        MainWindow.resize(1003, 483)
         MainWindow.setMinimumSize(QtCore.QSize(800, 350))
         self.MainWindows = QtWidgets.QWidget(MainWindow)
         self.MainWindows.setObjectName("MainWindows")
@@ -47,16 +47,14 @@ class Ui_MainWindow(object):
         self.VideoWidget.setResizeAnchor(QtWidgets.QGraphicsView.AnchorViewCenter)
         self.VideoWidget.setObjectName("VideoWidget")
         self.horizontalLayout.addWidget(self.VideoWidget)
-        self.openGLWidget = QtWidgets.QOpenGLWidget(self.frame)
+        self.GLWidget = QtWidgets.QGraphicsView(self.frame)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(50)
         sizePolicy.setVerticalStretch(100)
-        sizePolicy.setHeightForWidth(self.openGLWidget.sizePolicy().hasHeightForWidth())
-        self.openGLWidget.setSizePolicy(sizePolicy)
-        self.openGLWidget.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.openGLWidget.setAcceptDrops(True)
-        self.openGLWidget.setObjectName("openGLWidget")
-        self.horizontalLayout.addWidget(self.openGLWidget)
+        sizePolicy.setHeightForWidth(self.GLWidget.sizePolicy().hasHeightForWidth())
+        self.GLWidget.setSizePolicy(sizePolicy)
+        self.GLWidget.setObjectName("GLWidget")
+        self.horizontalLayout.addWidget(self.GLWidget)
         self.gridViewerLayout.addWidget(self.frame, 0, 0, 1, 1)
         self.gridLayout.addLayout(self.gridViewerLayout, 0, 0, 1, 2)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout()
@@ -306,7 +304,7 @@ class Ui_MainWindow(object):
         self.gridLayout.addLayout(self.bottomButtons, 3, 0, 1, 1)
         MainWindow.setCentralWidget(self.MainWindows)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1003, 22))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")

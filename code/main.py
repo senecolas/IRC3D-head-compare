@@ -361,7 +361,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     pixmap = self.meshManager.frame()
 
     # draw it
-    self.drawOn(pixmap, self.openGLWidget)
+    self.drawOn(pixmap, self.GLWidget)
     
   def draw(self):
     """ Draw the video and the mesh"""
