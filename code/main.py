@@ -3,6 +3,7 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from VideoManager import VideoManager
+from MeshManager import MeshManager
 import argparse
 import math
 import json
@@ -14,7 +15,7 @@ from ui import main
 import utils
 from utils import debounce
 
-# python3 code/main.py --video ./videos/CCTV_1.mp4 --output ./output/output.txt
+# python3 main.py --video ../videos/CCTV_1.mp4
 
 def parse_args():
   """Parse input arguments."""
@@ -32,6 +33,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     
     # DEFAULT VARIABLES
     self.videoManager = VideoManager()
+    self.meshManager = MeshManager('../face orientation/FinalExport.obj')
     self.isDragging = False
     self.faceDetector = None
     self.progressDialog = QtWidgets.QProgressDialog("Loading...", "Stop", 0, 100, self)
