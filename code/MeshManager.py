@@ -10,6 +10,8 @@ import cv2
 import json
 import os
 
+import ctypes
+
 import pyglet
 from pyglet.gl import *
 from pywavefront import visualization
@@ -51,8 +53,7 @@ class MeshManager():
 
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    self.width, self.height = self.glViewport
-    gluPerspective(20.0, self.width/float(self.height), 1, 100.0)
+    gluPerspective(20.0, self.viewWidth/float(self.viewHeight), 1, 100.0)
     glEnable(GL_DEPTH_TEST)
     glMatrixMode(GL_MODELVIEW)
 
@@ -99,16 +100,26 @@ class MeshManager():
     # To check color buffer (then compare it with the pixmap after conversion) #
     # pyglet.image.get_buffer_manager().get_color_buffer().save('screenshot.png')
 
-    return pyglet.image.get_buffer_manager().get_color_buffer()
+    rgbImage = pyglet.image.get_buffer_manager().get_color_buffer()
+
+    # Convert ColorBuffer to Pixmap
+
+    convertToQtFormat = QtGui.QImage(rgbImage.get_image_data().data, rgbImage.get_image_data().width, rgbImage.get_image_data().height, QtGui.QImage.Format_RGBA8888_Premultiplied)
+    # convertToQtFormat.save('qImage_screenshot.png')
+    convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
+
+    pixmap = QtGui.QPixmap(convertToQtFormat)
+
+    return pixmap
       
 
   #################################
   ### ====     DRAWING     ==== ###
   #################################
 
-  def drawMesh(self, face):
+  def drawMesh(self):
     yaw, pitch, roll = (0,0,0)
-    x, y, z = (0.2,-2,0)
+    x, y, z = (0,-2,0)
 
     # Transforms : comparisons between face bounding boxes( on the video) and the bounding box of the face on OpenGL render --> y position : we move the mesh back until bounding boxes are "almost even"
     # then we move the mesh on x and z axes to make the bounding box at the same pos
@@ -122,15 +133,3 @@ class MeshManager():
     glRotatef(-pitch, 1, 0, 0)
     glRotatef(roll, 0, 1, 0)
     glRotatef(-yaw, 0, 0, 1)
-
-  def convertGLFrameToPixmap(self):
-
-    rgbImage = self.frame()
-
-    convertToQtFormat = QtGui.QImage(rgbImage.get_image_data().data, rgbImage.get_image_data().width, rgbImage.get_image_data().height, QtGui.QImage.Format_RGBA8888_Premultiplied)
-    # convertToQtFormat.save('qImage_screenshot.png')
-    convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
-
-    pixmap = QtGui.QPixmap(convertToQtFormat)
-
-    return pixmap

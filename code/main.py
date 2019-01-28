@@ -355,12 +355,20 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     
     # update the processTable
     self.updateProcessTable(index - 1)
+
+  def drawMesh(self):
+    # get the mesh frame
+    pixmap = self.meshManager.frame()
+
+    # draw it
+    self.drawOn(pixmap, self.openGLWidget)
     
   def draw(self):
     """ Draw the video and the mesh"""
     if self.videoManager.isLoaded() == False:
       return
     self.drawVideo()
+    self.drawMesh()
     self.updateInfo()
     
   def drawOn(self, pixmap, widget):
@@ -375,8 +383,6 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     
     #Center on the appropriate position
     widget.centerOn(self.centerX, self.centerY)
-  
-  
   
   #################################
   ### ====     UPDATE      ==== ###
