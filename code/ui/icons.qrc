@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icons">
+    <file>images/photo.png</file>
+    <file>images/refresh.png</file>
     <file>images/coordinates.png</file>
     <file>images/last-10frame.png</file>
     <file>images/last-frame.png</file>
