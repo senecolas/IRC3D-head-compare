@@ -33,7 +33,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     
     # DEFAULT VARIABLES
     self.videoManager = VideoManager()
-    self.meshManager = MeshManager('../face orientation/visage.obj')
+    self.meshManager = MeshManager('../face orientation/FinalExport.obj')
     self.isDragging = False
     self.faceDetector = None
     self.progressDialog = QtWidgets.QProgressDialog("Loading...", "Stop", 0, 100, self)
@@ -67,6 +67,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     # SLIDERS EVENTS
     self.videoSlider.actionTriggered.connect(lambda: self.sliderChanged())
     self.confidenceSlider.actionTriggered.connect(lambda: self.confidenceChanged())
+    self.fovySlider.actionTriggered.connect(lambda: self.fovyChanged())
     
     # MOUSE EVENTS
     self.VideoWidget.wheelEvent = self.wheelEvent
@@ -158,6 +159,12 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     """ Event call at each confidenceSlider changements. Change the confThreshold and redraw the frame """
     self.faceDetector.confThreshold = self.confidenceSlider.value() / 100.
     self.confidenceInfo.setText("{0:.2f}".format(self.faceDetector.confThreshold))
+    self.draw() #we redraw the frame
+
+  def fovyChanged(self):
+    """ Event call at each fovySlider changements. Change the fovy and redraw the frame """
+    self.meshManager.fovy = self.fovySlider.value()
+    self.fovyInfo.setText("{0:.2f}".format(self.meshManager.fovy))
     self.draw() #we redraw the frame
     
     
@@ -306,8 +313,10 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
 
   def loadModel(self, fileName):
     """ Load a 3D model """
-    self.ModelPath = fileName
-    self.modelInfo.setText("Model: " + self.ModelPath)
+    self.meshManager.load(fileName)
+    
+    # we draw the first frame
+    self.draw() 
     
     
   def loadVideo(self, fileName):
