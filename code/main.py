@@ -354,6 +354,13 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
   def loadVideo(self, fileName):
     """ Load a video """
     self.videoManager.load(fileName, self.cache_string)
+
+    # InitGL context with video size
+    width = int(self.videoManager.video.get(3))
+    height = int(self.videoManager.video.get(4))
+    self.meshManager.viewWidth = width
+    self.meshManager.viewHeight = height
+    self.meshManager.initGL()
     
     # we set the slider
     self.videoSlider.setMaximum(self.videoManager.frameCount - 1) 

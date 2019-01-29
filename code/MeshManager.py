@@ -36,7 +36,6 @@ class MeshManager():
 
     if meshPath != "":
       self.load(meshPath)
-    self.initGL()
 
   #################################
   ### ====     LOADING     ==== ###
@@ -48,8 +47,6 @@ class MeshManager():
   def initGL(self):
     self.isModelLoaded = True
     # TODO : Set same viewHeight and width as the video
-    self.viewWidth = 1600
-    self.viewHeight = 900
     self.glWindow = pyglet.window.Window(self.viewWidth, self.viewHeight, caption='Mesh orientation', resizable=True)
     self.lightfv = ctypes.c_float * 4
 
@@ -133,19 +130,22 @@ class MeshManager():
   #################################
 
   def drawMesh(self, yaw, pitch, roll):
-    x, y, z = (0, -2, 0)
+    if self.mesh != None:
+      x, y, z = (0, -2, 0)
 
-    # Transforms : comparisons between face bounding boxes( on the video) and the bounding box of the face on OpenGL render --> y position : we move the mesh back until bounding boxes are "almost even"
-    # then we move the mesh on x and z axes to make the bounding box at the same pos
-    # BUT --> this involve a bounding box on the pixmap frame wich follow the face
+      # Transforms : comparisons between face bounding boxes( on the video) and the bounding box of the face on OpenGL render --> y position : we move the mesh back until bounding boxes are "almost even"
+      # then we move the mesh on x and z axes to make the bounding box at the same pos
+      # BUT --> this involve a bounding box on the pixmap frame wich follow the face
 
-    # Reset previous matrix transformations
-    glLoadIdentity()
+      # Reset previous matrix transformations
+      glLoadIdentity()
 
-    # Rotations for sphere on axis - useful
-    glTranslated(x, z, y)
-    glRotatef(-pitch - self.rx, 1, 0, 0) # sounds like pitch on x axis -> red on the schema
-    glRotatef(-yaw - self.rz, 0, 1, 0) # sounds like yaw on z axis -> green on schema
-    glRotatef(-roll - self.ry, 0, 0, 1) # sounds like roll on y axis -> blue on schema
+      # Rotations for sphere on axis - useful
+      glTranslated(x, z, y)
+      glRotatef(-pitch - self.rx, 1, 0, 0) # sounds like pitch on x axis -> red on the schema
+      glRotatef(-yaw - self.rz, 0, 1, 0) # sounds like yaw on z axis -> green on schema
+      glRotatef(-roll - self.ry, 0, 0, 1) # sounds like roll on y axis -> blue on schema
 
-    visualization.draw(self.mesh)
+      visualization.draw(self.mesh)
+    else:
+      print ("No mesh loaded : can't draw the mesh")
