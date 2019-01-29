@@ -52,6 +52,12 @@ class MeshManager():
 
     self.glWindow.set_visible(False)
     glMatrixMode(GL_PROJECTION)
+    
+    # OpenGL INFO
+    info = GLInfo()
+    info.set_active_context()
+
+    print("-- OpenGL use the " + str(info.get_renderer()))
 
   #################################
   ### ====      TESTS      ==== ###
