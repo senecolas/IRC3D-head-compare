@@ -141,11 +141,3 @@ class MeshManager():
     glRotatef(-roll, 0, 0, 1) # sounds like roll on y axis -> blue on schema
 
     visualization.draw(self.mesh)
-    
-    total, used = os.popen(
-        '"nvidia-smi" --query-gpu=memory.total,memory.used --format=csv,nounits,noheader'
-            ).read().split('\n')[0].split(',')
-    total = int(total)
-    used = int(used)
-
-    print('After pyglet total GPU mem:', total, 'used:', used)

@@ -61,14 +61,6 @@ class FaceDetector():
 
   def load(self, callback=None):
     """ Load deep learning data (DLIB and Hopenet). Call the callback(float, string) function with percentage and progress message at each state change """
-    total, used = os.popen(
-        '"nvidia-smi" --query-gpu=memory.total,memory.used --format=csv,nounits,noheader'
-            ).read().split('\n')[0].split(',')
-    total = int(total)
-    used = int(used)
-
-    print('Before total GPU mem:', total, 'used:', used)
-    
     if callback != None:
       callback(0.0, "Get GPU/CPU config...")
     
@@ -114,13 +106,6 @@ class FaceDetector():
     # Test the Model
     self.hopenetModel.eval()  # Change model to 'eval' mode (BN uses moving mean/var).
     
-    total, used = os.popen(
-        '"nvidia-smi" --query-gpu=memory.total,memory.used --format=csv,nounits,noheader'
-            ).read().split('\n')[0].split(',')
-    total = int(total)
-    used = int(used)
-
-    print('After total GPU mem:', total, 'used:', used)
 
   def stop(self):
     """ Stop the frame calculation """
