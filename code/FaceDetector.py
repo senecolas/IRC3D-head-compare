@@ -9,7 +9,9 @@ import cv2
 import datasets
 import dlib
 import dlib.cuda as cuda
+import gc
 from hopenet import *
+import os
 import time
 import timeit
 import torch
@@ -27,7 +29,7 @@ class FaceDetector():
       - 'gpuID' is the identifier of the GPU to use by default (if no gpu is detected, the cpu will be used)
     """
     self.gpuId = gpuID
-    self.deviceType = 'cuda'
+    self.deviceType = 'cpu'
     self.faceModelPath = faceModelPath
     self.snapshotPath = snapshotPath
     self.confThreshold = 0.75
@@ -42,6 +44,7 @@ class FaceDetector():
     """ Set the CPU or GPU configuration """
     
     if torch.cuda.is_available() and self.gpuId >= 0: # CUDA is available 
+      self.deviceType = 'cuda'
       if self.gpuId >= torch.cuda.device_count(): # invalid GPU ID, we take the current GPU
         self.gpuId = torch.cuda.current_device()
       self.device = torch.device('cuda:%d' % (self.gpuId))
@@ -58,6 +61,14 @@ class FaceDetector():
 
   def load(self, callback=None):
     """ Load deep learning data (DLIB and Hopenet). Call the callback(float, string) function with percentage and progress message at each state change """
+    total, used = os.popen(
+        '"nvidia-smi" --query-gpu=memory.total,memory.used --format=csv,nounits,noheader'
+            ).read().split('\n')[0].split(',')
+    total = int(total)
+    used = int(used)
+
+    print('Before total GPU mem:', total, 'used:', used)
+    
     if callback != None:
       callback(0.0, "Get GPU/CPU config...")
     
@@ -102,6 +113,14 @@ class FaceDetector():
 
     # Test the Model
     self.hopenetModel.eval()  # Change model to 'eval' mode (BN uses moving mean/var).
+    
+    total, used = os.popen(
+        '"nvidia-smi" --query-gpu=memory.total,memory.used --format=csv,nounits,noheader'
+            ).read().split('\n')[0].split(',')
+    total = int(total)
+    used = int(used)
+
+    print('After total GPU mem:', total, 'used:', used)
 
   def stop(self):
     """ Stop the frame calculation """
