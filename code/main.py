@@ -68,6 +68,9 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.videoSlider.actionTriggered.connect(lambda: self.sliderChanged())
     self.confidenceSlider.actionTriggered.connect(lambda: self.confidenceChanged())
     self.fovySlider.actionTriggered.connect(lambda: self.fovyChanged())
+    self.yawSlider.actionTriggered.connect(lambda: self.yawChanged())
+    self.pitchSlider.actionTriggered.connect(lambda: self.pitchChanged())
+    self.rollSlider.actionTriggered.connect(lambda: self.rollChanged())
     
     # MOUSE EVENTS
     self.VideoWidget.wheelEvent = self.wheelEvent
@@ -165,6 +168,24 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     """ Event call at each fovySlider changements. Change the fovy and redraw the frame """
     self.meshManager.fovy = self.fovySlider.value()
     self.fovyInfo.setText("{0:.2f}".format(self.meshManager.fovy))
+    self.draw() #we redraw the frame
+
+  def yawChanged(self):
+    """ Event call at each fovySlider changements. Change the fovy and redraw the frame """
+    self.meshManager.rz = self.yawSlider.value()
+    self.yawInfo.setText("{0:.2f}".format(self.meshManager.rz))
+    self.draw() #we redraw the frame
+
+  def pitchChanged(self):
+    """ Event call at each fovySlider changements. Change the fovy and redraw the frame """
+    self.meshManager.rx = self.pitchSlider.value()
+    self.pitchInfo.setText("{0:.2f}".format(self.meshManager.rx))
+    self.draw() #we redraw the frame
+
+  def rollChanged(self):
+    """ Event call at each fovySlider changements. Change the fovy and redraw the frame """
+    self.meshManager.ry = self.rollSlider.value()
+    self.rollInfo.setText("{0:.2f}".format(self.meshManager.ry))
     self.draw() #we redraw the frame
     
     

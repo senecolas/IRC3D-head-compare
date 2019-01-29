@@ -14,6 +14,7 @@ import pyglet
 from pyglet.gl import *
 from pywavefront import Wavefront
 from pywavefront import visualization
+from pywavefront import Wavefront
 from pyglet.gl.gl_info import GLInfo
 
 class MeshManager():
@@ -29,6 +30,9 @@ class MeshManager():
     self.glWindow = None
     self.lightfv = None
     self.fovy = 20
+    self.rx = 0
+    self.ry = 0
+    self.rz = 0
 
     if meshPath != "":
       self.load(meshPath)
@@ -140,8 +144,8 @@ class MeshManager():
 
     # Rotations for sphere on axis - useful
     glTranslated(x, z, y)
-    glRotatef(-pitch, 1, 0, 0) # sounds like pitch on x axis -> red on the schema
-    glRotatef(-yaw, 0, 1, 0) # sounds like yaw on z axis -> green on schema
-    glRotatef(-roll, 0, 0, 1) # sounds like roll on y axis -> blue on schema
+    glRotatef(-pitch - self.rx, 1, 0, 0) # sounds like pitch on x axis -> red on the schema
+    glRotatef(-yaw - self.rz, 0, 1, 0) # sounds like yaw on z axis -> green on schema
+    glRotatef(-roll - self.ry, 0, 0, 1) # sounds like roll on y axis -> blue on schema
 
     visualization.draw(self.mesh)
