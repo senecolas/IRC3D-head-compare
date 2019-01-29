@@ -54,8 +54,7 @@ class VideoManager():
       raise ValueError("ERROR : Can't load %s" % (self.videoPath))
  
     self.fps = int(self.video.get(cv2.CAP_PROP_FPS))
-    self.frameCount = int(self.video.get(cv2.CAP_PROP_FRAME_COUNT))
-    
+    self.frameCount = self.realFrameNumber()
     # we load the cache
     self.cachePath = self.videoPath + self.cacheString + ".json"
     self.loadCacheFile() #we load or create the cache file
@@ -233,6 +232,20 @@ class VideoManager():
         res.append(face)
     return res
   
+  def realFrameNumber(self):
+    """ 
+    Calculates and returns the frame number of the video by reading it.
+    Do not include corrupted frame and/or frame that cannot be parsed by the underlying codecs
+    We can use CV_CAP_PROP_FRAME_COUNT because it gives the property of 'number of frames' that comes from the video header (not accurate)
+    """
+    count = 0
+    while(True):
+      # Capture frame-by-frame
+      ret, frame = self.video.read()
+      if not ret:
+        break
+      count += 1
+    return count
 
 
   #################################
