@@ -29,6 +29,7 @@ class MeshManager():
     self.viewHeight = 0
     self.glWindow = None
     self.lightfv = None
+    self.fovy = 20
 
     if meshPath != "":
       self.load(meshPath)
@@ -50,12 +51,7 @@ class MeshManager():
     self.lightfv = ctypes.c_float * 4
 
     self.glWindow.set_visible(False)
-
     glMatrixMode(GL_PROJECTION)
-    glLoadIdentity()
-    gluPerspective(20.0, self.viewWidth/float(self.viewHeight), 1, 100.0)
-    glEnable(GL_DEPTH_TEST)
-    glMatrixMode(GL_MODELVIEW)
 
 
   #################################
@@ -79,9 +75,12 @@ class MeshManager():
 
     if self.isModelLoaded == False:
       return
-
+    glMatrixMode(GL_PROJECTION)
     self.glWindow.clear()
     glLoadIdentity()
+    gluPerspective(self.fovy, self.viewWidth/float(self.viewHeight), 1, 100.0)
+    glEnable(GL_DEPTH_TEST)
+    glMatrixMode(GL_MODELVIEW)
 
     glLightfv(GL_LIGHT0, GL_POSITION, self.lightfv(-20.0, 50.0, 25.0, 0.0))
     glLightfv(GL_LIGHT0, GL_AMBIENT, self.lightfv(0.5, 0.5, 0.5, 1.0))
@@ -95,10 +94,8 @@ class MeshManager():
 
     glMatrixMode(GL_MODELVIEW)
 
-    cpt = 0
     for face in faces:
-      self.drawMesh(face, cpt)
-      cpt += 0.1
+      self.drawMesh(face)
 
     # To check color buffer (then compare it with the pixmap after conversion) #
     # pyglet.image.get_buffer_manager().get_color_buffer().save('screenshot.png')
@@ -124,7 +121,7 @@ class MeshManager():
   ### ====     DRAWING     ==== ###
   #################################
 
-  def drawMesh(self, face, cpt):
+  def drawMesh(self, face):
     x, y, z = (0,-2,0)
 
     # Transforms : comparisons between face bounding boxes( on the video) and the bounding box of the face on OpenGL render --> y position : we move the mesh back until bounding boxes are "almost even"
