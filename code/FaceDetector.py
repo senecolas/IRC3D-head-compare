@@ -11,7 +11,6 @@ import dlib
 import dlib.cuda as cuda
 import gc
 from hopenet import *
-import os
 import time
 import timeit
 import torch
@@ -40,6 +39,7 @@ class FaceDetector():
     self.device = None
     self.isStop = False
 
+
   def setTorchConfig(self):
     """ Set the CPU or GPU configuration """
     
@@ -51,13 +51,15 @@ class FaceDetector():
       cudnn.enabled = True
 
       # CUDA INFO
-      print(torch.cuda.get_device_name(self.gpuId))
+      print("-- FaceDetector use the", torch.cuda.get_device_name(self.gpuId))
       if dlib.DLIB_USE_CUDA == False:
         print("Your installation of dlib does not use cuda, the face detection will use the CPU. To reinstall dlib with cuda, refer to the installation instructions.")
       
     else: # CUDA is not available or gpuId = -1 (force CPU), use CPU
       self.deviceType = 'cpu'
       self.device = torch.device('cpu') 
+      print("-- FaceDetector use the CPU")
+
 
   def load(self, callback=None):
     """ Load deep learning data (DLIB and Hopenet). Call the callback(float, string) function with percentage and progress message at each state change """
@@ -105,18 +107,21 @@ class FaceDetector():
 
     # Test the Model
     self.hopenetModel.eval()  # Change model to 'eval' mode (BN uses moving mean/var).
-    
+
 
   def stop(self):
     """ Stop the frame calculation """
     self.isStop = True
 
+
   def isStopped(self):
     return self.isStop
+
 
   def isLoaded(self):
     """ Return true if deep learning data is loaded """
     return self.isLoadedData
+  
   
   def getFrameFaces(self, frame, callback=None):
     """ Get faces of the frame. Call the callback(float, string) function with percentage and progress message at each state change. Raise exception if stopProcessing is called  """

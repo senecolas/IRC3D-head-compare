@@ -6,16 +6,15 @@ Mesh manager class
 from Face import Face
 from FaceDetector import FaceDetector
 from PyQt5 import QtGui
+import ctypes
 import cv2
 import json
 import os
-
-import ctypes
-
 import pyglet
 from pyglet.gl import *
-from pywavefront import visualization
 from pywavefront import Wavefront
+from pywavefront import visualization
+from pyglet.gl.gl_info import GLInfo
 
 class MeshManager():
   def __init__(self, meshPath=""):
@@ -47,12 +46,17 @@ class MeshManager():
     # TODO : Set same viewHeight and width as the video
     self.viewWidth = 1600
     self.viewHeight = 900
-    self.glWindow = pyglet.window.Window(self.viewWidth,self.viewHeight, caption='Mesh orientation', resizable=True)
+    self.glWindow = pyglet.window.Window(self.viewWidth, self.viewHeight, caption='Mesh orientation', resizable=True)
     self.lightfv = ctypes.c_float * 4
 
     self.glWindow.set_visible(False)
     glMatrixMode(GL_PROJECTION)
+    
+    # OpenGL INFO
+    info = GLInfo()
+    info.set_active_context()
 
+    print("-- OpenGL use the " + str(info.get_renderer()))
 
   #################################
   ### ====      TESTS      ==== ###
@@ -78,7 +82,7 @@ class MeshManager():
     glMatrixMode(GL_PROJECTION)
     self.glWindow.clear()
     glLoadIdentity()
-    gluPerspective(self.fovy, self.viewWidth/float(self.viewHeight), 1, 100.0)
+    gluPerspective(self.fovy, self.viewWidth / float(self.viewHeight), 1, 100.0)
     glEnable(GL_DEPTH_TEST)
     glMatrixMode(GL_MODELVIEW)
 
@@ -95,7 +99,7 @@ class MeshManager():
     glMatrixMode(GL_MODELVIEW)
 
     if len(faces) == 0:
-      self.drawMesh(0,0,0)
+      self.drawMesh(0, 0, 0)
     else:
       for face in faces:
         self.drawMesh(face.yaw, face.pitch, face.roll)
@@ -114,7 +118,7 @@ class MeshManager():
 
     # Mirror the pixmap (because of an gorizontal "mirror effect" during convert)
     sm = QtGui.QTransform()
-    sm.scale(1,-1)
+    sm.scale(1, -1)
     pixmap = pixmap.transformed(sm)
 
     return pixmap
@@ -125,7 +129,7 @@ class MeshManager():
   #################################
 
   def drawMesh(self, yaw, pitch, roll):
-    x, y, z = (0,-2,0)
+    x, y, z = (0, -2, 0)
 
     # Transforms : comparisons between face bounding boxes( on the video) and the bounding box of the face on OpenGL render --> y position : we move the mesh back until bounding boxes are "almost even"
     # then we move the mesh on x and z axes to make the bounding box at the same pos
