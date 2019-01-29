@@ -313,8 +313,10 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
 
   def loadModel(self, fileName):
     """ Load a 3D model """
-    self.ModelPath = fileName
-    self.modelInfo.setText("Model: " + self.ModelPath)
+    self.meshManager.load(fileName)
+    
+    # we draw the first frame
+    self.draw() 
     
     
   def loadVideo(self, fileName):
