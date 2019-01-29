@@ -59,6 +59,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.processAllVideo_PB.clicked.connect(lambda: self.processAllVideo())
     self.coordinates_PB.clicked.connect(lambda: self.drawAxisEvent())
     self.square_BT.clicked.connect(lambda: self.drawSquareEvent())
+    self.resetButton.clicked.connect(lambda: self.resetOrientationEvent())
     
     # MENU BAR EVENTS
     self.actionOpen_video.triggered.connect(self.selectVideo)
@@ -148,6 +149,16 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     else:
       self.videoManager.ifDrawSquare = True
     self.drawVideo() #we redraw the frame
+
+  def resetOrientationEvent(self):
+    self.meshManager.rx = self.meshManager.ry = self.meshManager.rz = 0
+    self.yawInfo.setText("{0:.2f}".format(0))
+    self.pitchInfo.setText("{0:.2f}".format(0))
+    self.rollInfo.setText("{0:.2f}".format(0))
+    self.yawSlider.setValue(0)
+    self.pitchSlider.setValue(0)
+    self.rollSlider.setValue(0)
+    self.draw() #we redraw the frame
   
   
   def sliderChanged(self):
