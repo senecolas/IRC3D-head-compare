@@ -22,7 +22,7 @@ class MeshManager():
     """
     Constructor of the MeshManager
     """
-    self.meshPath = meshPath;
+    self.meshPath = meshPath
     self.mesh = None
     self.isModelLoaded = False
     self.viewWidth = 0
@@ -46,7 +46,6 @@ class MeshManager():
     
   def initGL(self):
     self.isModelLoaded = True
-    # TODO : Set same viewHeight and width as the video
     self.glWindow = pyglet.window.Window(self.viewWidth, self.viewHeight, caption='Mesh orientation', resizable=True)
     self.lightfv = ctypes.c_float * 4
 
@@ -99,11 +98,13 @@ class MeshManager():
 
     glMatrixMode(GL_MODELVIEW)
 
+    mesh_cpt = 0
     if len(faces) == 0:
-      self.drawMesh(0, 0, 0)
+      self.drawMesh(0, 0, 0, 0, 1)
     else:
       for face in faces:
-        self.drawMesh(face.yaw, face.pitch, face.roll)
+        self.drawMesh(face.yaw, face.pitch, face.roll, mesh_cpt, len(faces))
+        mesh_cpt += 1
 
     # To check color buffer (then compare it with the pixmap after conversion) #
     # pyglet.image.get_buffer_manager().get_color_buffer().save('screenshot.png')
@@ -129,9 +130,10 @@ class MeshManager():
   ### ====     DRAWING     ==== ###
   #################################
 
-  def drawMesh(self, yaw, pitch, roll):
+  def drawMesh(self, yaw, pitch, roll, mesh_number, nb_meshes):
     if self.mesh != None:
-      x, y, z = (0, -2, 0)
+      x_start = -((nb_meshes - 1) * 0.125)
+      x, y, z = (x_start + 0.25 * mesh_number, -2, 0)
 
       # Transforms : comparisons between face bounding boxes( on the video) and the bounding box of the face on OpenGL render --> y position : we move the mesh back until bounding boxes are "almost even"
       # then we move the mesh on x and z axes to make the bounding box at the same pos
