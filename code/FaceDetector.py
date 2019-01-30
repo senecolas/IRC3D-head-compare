@@ -141,7 +141,10 @@ class FaceDetector():
     try:
       dets = self.cnnFaceDetector(cv2_frame, 1) # 1 is the number of times it should upsample the image (helps to detect smaller faces)
     except:
-      dets = self.cnnFaceDetector(cv2_frame, 0) # when upsample does not work
+      try:
+        dets = self.cnnFaceDetector(cv2_frame, 0) # when upsample does not work
+      except:
+        print("DLIB can not scan this frame")
       
     if self.isStop: 
       raise
