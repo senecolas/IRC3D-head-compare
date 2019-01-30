@@ -1,12 +1,12 @@
 from FaceDetector import FaceDetector
+from MeshManager import MeshManager
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from VideoManager import VideoManager
-from MeshManager import MeshManager
 import argparse
-import math
 import json
+import math
 import os
 import sys
 import time
@@ -60,6 +60,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.coordinates_PB.clicked.connect(lambda: self.drawAxisEvent())
     self.square_BT.clicked.connect(lambda: self.drawSquareEvent())
     self.resetButton.clicked.connect(lambda: self.resetOrientationEvent())
+    self.screenshot_PB.clicked.connect(lambda: self.screenshotEvent())
     
     # MENU BAR EVENTS
     self.actionOpen_video.triggered.connect(self.selectVideo)
@@ -114,7 +115,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     x = event.pos().x()
     y = event.pos().y()
     
-    if x > self.maxWidth : # if we are on the second screen
+    if x > self.maxWidth: # if we are on the second screen
       x -= self.maxWidth
       
     self.zoom = utils.clamp(1., self.zoom + event.angleDelta().y() * 0.002, 20.)
@@ -175,29 +176,49 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.confidenceInfo.setText("{0:.2f}".format(self.faceDetector.confThreshold))
     self.draw() #we redraw the frame
 
+
   def fovyChanged(self):
     """ Event call at each fovySlider changements. Change the fovy and redraw the frame """
     self.meshManager.fovy = self.fovySlider.value()
-    self.fovyInfo.setText("{0:.2f}".format(self.meshManager.fovy))
+    self.fovyInfo.setText(str(self.meshManager.fovy))
     self.draw() #we redraw the frame
+
 
   def yawChanged(self):
     """ Event call at each fovySlider changements. Change the fovy and redraw the frame """
     self.meshManager.rz = self.yawSlider.value()
-    self.yawInfo.setText("{0:.2f}".format(self.meshManager.rz))
+    self.yawInfo.setText(str(self.meshManager.rz))
     self.draw() #we redraw the frame
+
 
   def pitchChanged(self):
     """ Event call at each fovySlider changements. Change the fovy and redraw the frame """
     self.meshManager.rx = self.pitchSlider.value()
-    self.pitchInfo.setText("{0:.2f}".format(self.meshManager.rx))
+    self.pitchInfo.setText(str(self.meshManager.rx))
     self.draw() #we redraw the frame
+
 
   def rollChanged(self):
     """ Event call at each fovySlider changements. Change the fovy and redraw the frame """
     self.meshManager.ry = self.rollSlider.value()
-    self.rollInfo.setText("{0:.2f}".format(self.meshManager.ry))
+    self.rollInfo.setText(str(self.meshManager.ry))
     self.draw() #we redraw the frame
+    
+      
+  def screenshotEvent(self):
+    """ Event call at each click on screenshot_PB. Opens a save selection window and save the screenshot. """
+    if self.videoManager.isLoaded() == False:
+      return
+    
+    # Default path = VIDEO_PATH/VIDEO_NAME(without extension)-frame(currentFrameNumber)
+    defaultPath = os.path.splitext(self.videoManager.videoPath)[0] + "-frame" + str(self.videoManager.currentFrameNumber)
+    
+    # Open save file window 
+    fileName = QtWidgets.QFileDialog.getSaveFileName(self, 'Save the screenshot', defaultPath, "PNG (*.png);;JPEG (*.jpg)")[0]
+    
+    # Screenshot
+    self.screenshot(fileName)
+    print("Screenshot save at", fileName)
     
     
   def selectVideo(self):
@@ -386,6 +407,41 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.resizeProcessTable()
   
   
+    
+  #################################
+  ### ====     ACTIONS     ==== ###
+  #################################
+  
+  def screenshot(self, path):
+    """ Take a screenshot of both windows (with zooms) and save it in 'path' """
+    if self.videoManager.isLoaded() == False or self.meshManager.isLoaded() == False:
+      return
+
+    # get currents frames QPixmap
+    videoScreen = self.VideoWidget.grab()
+    meshScreen = self.GLWidget.grab()
+    
+    # coordinates
+    width = videoScreen.width() + meshScreen.width()
+    height = max(videoScreen.height(), meshScreen.height())
+    leftRect = QtCore.QRectF(0, 0, videoScreen.width(), height)
+    rightRect = QtCore.QRectF(videoScreen.width(), 0, meshScreen.width(), height)
+    
+    # screenshot initialisation
+    screenshot = QtGui.QPixmap(width, height)
+    
+    # we paint the two frames
+    painter = QtGui.QPainter(screenshot)
+    painter.begin(self)
+    painter.drawPixmap(leftRect, videoScreen, QtCore.QRectF(videoScreen.rect()))
+    painter.drawPixmap(rightRect, meshScreen, QtCore.QRectF(meshScreen.rect()))
+    painter.end()
+    
+    # we save the screenshot
+    screenshot.save(path, 'png')
+    
+  
+  
   #################################
   ### ====     DRAWING     ==== ###
   #################################
@@ -432,6 +488,8 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     
     #Center on the appropriate position
     widget.centerOn(self.centerX, self.centerY)
+  
+  
   
   #################################
   ### ====     UPDATE      ==== ###
