@@ -497,11 +497,20 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
 
 
   def updateInfo(self):
-    """ Update the frame informations displayed on the screen """
+    """ Update the frame informations displayed on the screen and disabled headPosition_PB if faces are already loaded """
+    
+    # Frame information
     frameInfo = "Frame: " + str(int(self.videoManager.currentFrameNumber)) + "/" + str(int(self.videoManager.frameCount))
     self.frameInfo.setText(frameInfo)
+    
+    # Data information
     currentData = self.videoManager.getCurrentCacheData()
     if(currentData['isLoaded']):
+      
+      # disabled headPosition_PB
+      self.headPosition_PB.setEnabled(False)
+      
+      # show face(s) information
       faceNumber = currentData['faces'].__len__()
       if(faceNumber > 0):
         facesInfo = str(faceNumber) + " face(s) detected"
@@ -510,6 +519,10 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
         facesInfo = "No face was detected"
         self.facesInfo.setStyleSheet("color: rgb(255, 102, 0);")
     else:
+      # enabled headPosition_PB
+      self.headPosition_PB.setEnabled(True)
+      
+      # show face information
       facesInfo = "Frame not process"
       self.facesInfo.setStyleSheet("color: rgb(255, 0, 0);")
     self.facesInfo.setText(facesInfo)
