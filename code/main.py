@@ -315,7 +315,6 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
   
   def setProgressDialog(self, title="Traitement", stopCallback=None):
     """ Create the QProgressDialog and show it """
-    #self.progressDialog = QtWidgets.QProgressDialog(title, "Stop", 0, 100, self)
     self.progressDialog.setWindowTitle(title)
     self.progressDialog.setMinimumWidth(400)
     button = self.progressDialog.findChildren(QtWidgets.QPushButton)[0] #get cancel button
@@ -324,15 +323,16 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
       self.progressDialog.canceled.connect(stopCallback)
     else:
       button.hide()
-      #self.progressDialog.setCancelButton(None)
     self.progressDialog.show()
 
 
-  def updateProgressDialog(self, percentage, msg=''):
+  def updateProgressDialog(self, percentage, msg='', title=''):
     """ Update the QProgressDialog """
     self.progressDialog.setValue(percentage * 100)
     if msg != '':
       self.progressDialog.setLabelText(msg)
+    if title != '':
+      self.progressDialog.setWindowTitle(title)
     if percentage >= 1.:
       self.progressDialog.reset()
     QtCore.QCoreApplication.processEvents()

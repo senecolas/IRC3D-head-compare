@@ -133,11 +133,13 @@ class VideoManager():
   def getAllHeadPosition(self, faceDetectorCallback=None, callback=None):
     """ 
     Launch the getHeadPosition function for all frame from the current frame
-    Call the faceDetectorCallback(float, string) function with percentage and progress message at each state change
+    Call the faceDetectorCallback(float, string, string) function with percentage and progress message at each state change
     Call the callback() function after each frame processing 
     """
     for i in range(self.currentFrameNumber, self.frameCount + 1):
       if self.isFacesLoaded() == False:
+        if faceDetectorCallback != None:
+          faceDetectorCallback(0., "Loading the frame", "Get head position (%d/%d)" % (self.currentFrameNumber, self.frameCount))
         self.getHeadPosition(faceDetectorCallback)
         if self.faceDetector.isStopped():
           return
@@ -249,7 +251,7 @@ class VideoManager():
     """
     count = 0
     theoreticalFrameNumber = int(self.video.get(cv2.CAP_PROP_FRAME_COUNT))
-    if theoreticalFrameNumber > 30000 :
+    if theoreticalFrameNumber > 30000:
       return theoreticalFrameNumber
     while(True):
       # Capture frame-by-frame
