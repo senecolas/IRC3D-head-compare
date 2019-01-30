@@ -242,12 +242,15 @@ class VideoManager():
   def realFrameNumber(self, callback=None):
     """ 
     Calculates and returns the frame number of the video by reading it.
+    If the video is too long (>30000 frames) we use the theoretical frame number
     Do not include corrupted frame and/or frame that cannot be parsed by the underlying codecs
     We can use CV_CAP_PROP_FRAME_COUNT because it gives the property of 'number of frames' that comes from the video header (not accurate)
     Call the callback(float, string) function with percentage and progress message at each state change
     """
     count = 0
     theoreticalFrameNumber = int(self.video.get(cv2.CAP_PROP_FRAME_COUNT))
+    if theoreticalFrameNumber > 30000 :
+      return theoreticalFrameNumber
     while(True):
       # Capture frame-by-frame
       ret, frame = self.video.read()

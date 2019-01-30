@@ -561,6 +561,8 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
 
   def updateProcessTable(self, index):
     """ Update the frame informations displayed on the screen """
+    if not self.videoProcessTable.isVisible(): # if videoProcessTable is not set (to much frames)
+      return 
     bg = QtGui.QColor(153, 153, 153) #default background (gray)
     data = self.videoManager.getCacheData(index)
     # if a frame is loas
