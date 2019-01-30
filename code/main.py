@@ -266,11 +266,11 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     # Get faces
     data = self.videoManager.getHeadPosition(self.updateProgressDialog)
     
-    # End progress bar
-    self.updateProgressDialog(1.0, "End of the faces calculation")
-    
     # Redraw the frame
     self.draw()
+    
+    # End progress bar
+    self.updateProgressDialog(1.0, "End of the faces calculation")
     
     # return 
     return data

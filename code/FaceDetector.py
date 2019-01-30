@@ -99,14 +99,14 @@ class FaceDetector():
       self.hopenetModel.cuda(self.device)
     else:
       self.hopenetModel.cpu()
-  
-    if callback != None:
-      callback(1.0, "Ready to test network...") 
       
     self.isLoadedData = True
 
     # Test the Model
     self.hopenetModel.eval()  # Change model to 'eval' mode (BN uses moving mean/var).
+    
+    if callback != None:
+      callback(1.0, "Ready to test network...") 
 
 
   def stop(self):
@@ -166,7 +166,7 @@ class FaceDetector():
       if self.isStop: 
         raise
       if callback != None:
-        callback(0.75 + 0.25 * faceCount / facesNumber, "Calculate face orientation (%d/%d)" % (faceCount, facesNumber)) 
+        callback(0.75 + (0.25 * faceCount / facesNumber) - 0.01, "Calculate face orientation (%d/%d)" % (faceCount, facesNumber)) 
       
       # Get x_min, y_min, x_max, y_max, conf
       x_min = det.rect.left()
