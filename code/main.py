@@ -79,6 +79,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     
     # MOUSE EVENTS
     self.VideoWidget.wheelEvent = self.wheelEvent
+    self.GLWidget.wheelEvent = self.wheelEvent
     self.VideoWidget.mousePressEvent = self.mousePressEvent
     self.VideoWidget.mouseReleaseEvent = self.mouseReleaseEvent
     self.VideoWidget.mouseMoveEvent = self.mouseMoveEvent
