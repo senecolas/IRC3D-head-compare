@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icons">
+    <file>images/coordinates-off.png</file>
+    <file>images/square-off.png</file>
     <file>images/photo.png</file>
     <file>images/refresh.png</file>
     <file>images/coordinates.png</file>

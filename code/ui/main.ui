@@ -504,6 +504,9 @@
         <layout class="QHBoxLayout" name="bottomButtons">
          <item>
           <widget class="QPushButton" name="square_BT">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -514,13 +517,22 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="icons.qrc">
-             <normaloff>:/icons/images/square.png</normaloff>:/icons/images/square.png</iconset>
+            <iconset>
+             <normaloff>images/square-off.png</normaloff>
+             <normalon>:/icons/images/square.png</normalon>
+             <activeoff>:/icons/images/square-off.png</activeoff>
+             <selectedoff>:/icons/images/square-off.png</selectedoff>images/square-off.png</iconset>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="coordinates_PB">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -531,8 +543,14 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="icons.qrc">
-             <normaloff>:/icons/images/coordinates.png</normaloff>:/icons/images/coordinates.png</iconset>
+            <iconset>
+             <normaloff>images/coordinates-off.png</normaloff>
+             <normalon>:/icons/images/coordinates.png</normalon>
+             <activeoff>:/icons/images/coordinates-off.png</activeoff>
+             <selectedoff>:/icons/images/coordinates-off.png</selectedoff>images/coordinates-off.png</iconset>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
