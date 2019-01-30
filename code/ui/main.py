@@ -13,6 +13,9 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1028, 457)
         MainWindow.setMinimumSize(QtCore.QSize(1028, 457))
+        MainWindow.setDocumentMode(False)
+        MainWindow.setTabShape(QtWidgets.QTabWidget.Rounded)
+        MainWindow.setUnifiedTitleAndToolBarOnMac(False)
         self.MainWindows = QtWidgets.QWidget(MainWindow)
         self.MainWindows.setObjectName("MainWindows")
         self.gridLayout = QtWidgets.QGridLayout(self.MainWindows)
@@ -551,7 +554,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "IRC3D - Head Compare"))
         self.videoProcessTable.setSortingEnabled(False)
         self.frameInfo.setText(_translate("MainWindow", "Frame: ..."))
         self.facesInfo.setText(_translate("MainWindow", "Frame not process"))
