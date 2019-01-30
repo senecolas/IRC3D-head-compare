@@ -37,8 +37,8 @@ class VideoManager():
   ### ====     LOADING     ==== ###
   #################################
     
-  def load(self, fileName=None, cacheString=None):
-    """ Load the video """
+  def load(self, fileName=None, cacheString=None, callback=None):
+    """ Load the video. Call the callback(float, string) function with percentage and progress message at each state change """
     if fileName != None:
       self.videoPath = fileName
     if cacheString != None:
@@ -47,6 +47,9 @@ class VideoManager():
     if not os.path.exists(self.videoPath):
       raise ValueError("ERROR : %s don't exist" % (self.videoPath))
     
+    if callback != None:
+      callback(0.1, "Load the video with OpenCV")
+    
     self.video = cv2.VideoCapture(self.videoPath)
     
     if(not self.video.isOpened()):
@@ -54,7 +57,11 @@ class VideoManager():
       raise ValueError("ERROR : Can't load %s" % (self.videoPath))
  
     self.fps = int(self.video.get(cv2.CAP_PROP_FPS))
-    self.frameCount = self.realFrameNumber()
+    self.frameCount = self.realFrameNumber(callback)
+    
+    if callback != None:
+      callback(0.85, "Load or create the cache file")
+      
     # we load the cache
     self.cachePath = self.videoPath + self.cacheString + ".json"
     self.loadCacheFile() #we load or create the cache file
@@ -232,20 +239,25 @@ class VideoManager():
         res.append(face)
     return res
   
-  def realFrameNumber(self):
+  def realFrameNumber(self, callback=None):
     """ 
     Calculates and returns the frame number of the video by reading it.
     Do not include corrupted frame and/or frame that cannot be parsed by the underlying codecs
     We can use CV_CAP_PROP_FRAME_COUNT because it gives the property of 'number of frames' that comes from the video header (not accurate)
+    Call the callback(float, string) function with percentage and progress message at each state change
     """
     count = 0
+    theoreticalFrameNumber = int(self.video.get(cv2.CAP_PROP_FRAME_COUNT))
     while(True):
       # Capture frame-by-frame
       ret, frame = self.video.read()
       if not ret:
         break
+      if callback != None:
+        callback(0.1 + (count / theoreticalFrameNumber) * 0.75, "Calculating the number of frame")
       count += 1
     return count
+  
 
 
   #################################

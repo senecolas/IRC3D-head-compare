@@ -46,6 +46,9 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.mousePos = QtCore.QPointF(0, 0)
     self.videoFormats = []
     self.meshFormats = []
+    
+    # DISABLED ALL BUTTONS
+    self.setEnabledButtons(False)
 
     
     # PUSH BUTTONS EVENTS
@@ -324,10 +327,11 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.progressDialog.show()
 
 
-  def updateProgressDialog(self, percentage, msg):
+  def updateProgressDialog(self, percentage, msg=''):
     """ Update the QProgressDialog """
     self.progressDialog.setValue(percentage * 100)
-    self.progressDialog.setLabelText(msg)
+    if msg != '':
+      self.progressDialog.setLabelText(msg)
     if percentage >= 1.:
       self.progressDialog.reset()
     QtCore.QCoreApplication.processEvents()
@@ -374,7 +378,11 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     
   def loadVideo(self, fileName):
     """ Load a video """
-    self.videoManager.load(fileName, self.cache_string)
+    self.setProgressDialog("Loading video")
+    
+    self.videoManager.load(fileName, self.cache_string, self.updateProgressDialog)
+    
+    self.updateProgressDialog(0.9, "Initializing OpenGL context")
 
     # InitGL context with video size
     width = int(self.videoManager.video.get(3))
@@ -383,14 +391,19 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.meshManager.viewHeight = height
     self.meshManager.initGL()
     
-    # we set the slider
+    self.updateProgressDialog(0.95, "Update layers")
+    
+    # we set the slider and enabled all buttons
     self.videoSlider.setMaximum(self.videoManager.frameCount - 1) 
+    self.setEnabledButtons(True)
     
     # and we load the process table view
     self.initProcessTable()
     
     # we draw the first frame
     self.draw() 
+    
+    self.updateProgressDialog(1.0, "The video is loaded")
 
 
   def initProcessTable(self):
@@ -441,7 +454,22 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     screenshot.save(path, 'png')
     
   
-  
+  def setEnabledButtons(self, isEnable=True):
+    """ Enable all buttons (or disable is 'isEnable' is False). """
+    self.last10Frame_PB.setEnabled(isEnable)
+    self.lastFrame_PB.setEnabled(isEnable)
+    self.read_PB.setEnabled(isEnable)
+    self.pause_PB.setEnabled(isEnable)
+    self.nextFrame_PB.setEnabled(isEnable)
+    self.next10Frame_PB.setEnabled(isEnable)
+    self.headPosition_PB.setEnabled(isEnable)
+    self.processAllVideo_PB.setEnabled(isEnable)
+    self.screenshot_PB.setEnabled(isEnable)
+    self.coordinates_PB.setEnabled(isEnable)
+    self.square_BT.setEnabled(isEnable)
+    
+    
+    
   #################################
   ### ====     DRAWING     ==== ###
   #################################
@@ -460,6 +488,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     # update the processTable
     self.updateProcessTable(index - 1)
 
+
   def drawGL(self):
     # get faces
     faces = self.videoManager.faces()
@@ -468,6 +497,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     # draw it
     self.drawOn(pixmap, self.GLWidget)
     
+    
   def draw(self):
     """ Draw the video and the mesh"""
     if self.videoManager.isLoaded() == False:
@@ -475,6 +505,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.drawVideo()
     self.drawGL()
     self.updateInfo()
+    
     
   def drawOn(self, pixmap, widget):
     """ Draw the 'pixmap' on the QGraphicsView 'widget' by applying the zoom and the displacements """
