@@ -4,6 +4,8 @@ nbproject/*
 # Ignored videos and tests and output files
 videos/*
 video/*
+face/*
+faces/*
 test/*
 tests/*
 output/*

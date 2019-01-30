@@ -33,7 +33,7 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     
     # DEFAULT VARIABLES
     self.videoManager = VideoManager()
-    self.meshManager = MeshManager('../face orientation/FinalExport.obj')
+    self.meshManager = MeshManager()
     self.isDragging = False
     self.faceDetector = None
     self.progressDialog = QtWidgets.QProgressDialog("Loading...", "Stop", 0, 100, self)
