@@ -63,8 +63,10 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.processAllVideo_PB.clicked.connect(lambda: self.processAllVideo())
     self.coordinates_PB.clicked.connect(lambda: self.drawAxisEvent())
     self.square_BT.clicked.connect(lambda: self.drawSquareEvent())
-    self.resetButton.clicked.connect(lambda: self.resetOrientationEvent())
     self.screenshot_PB.clicked.connect(lambda: self.screenshotEvent())
+    self.resetOrientation_PB.clicked.connect(lambda: self.resetOrientationEvent())
+    self.resetTSH_PB.clicked.connect(lambda: self.resetTHSEvent())
+    self.resetBC_PB.clicked.connect(lambda: self.resetBCEvent())
     
     # MENU BAR EVENTS
     self.actionOpen_video.triggered.connect(self.selectVideo)
@@ -77,6 +79,11 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.yawSlider.actionTriggered.connect(lambda: self.yawChanged())
     self.pitchSlider.actionTriggered.connect(lambda: self.pitchChanged())
     self.rollSlider.actionTriggered.connect(lambda: self.rollChanged())
+    self.temperatureSlider.actionTriggered.connect(lambda: self.temperatureChanged())
+    self.saturationSlider.actionTriggered.connect(lambda: self.saturationChanged())
+    self.hueSlider.actionTriggered.connect(lambda: self.hueChanged())
+    self.brightnessSlider.actionTriggered.connect(lambda: self.brightnessChanged())
+    self.contrastSlider.actionTriggered.connect(lambda: self.contrastChanged())
     
     # MOUSE EVENTS
     self.VideoWidget.wheelEvent = self.wheelEvent
@@ -159,16 +166,38 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
       self.videoManager.ifDrawSquare = True
     self.drawVideo() #we redraw the frame
 
+
   def resetOrientationEvent(self):
     self.meshManager.rx = self.meshManager.ry = self.meshManager.rz = 0
-    self.yawInfo.setText("{0:.2f}".format(0))
-    self.pitchInfo.setText("{0:.2f}".format(0))
-    self.rollInfo.setText("{0:.2f}".format(0))
+    self.yawInfo.setText("0")
+    self.pitchInfo.setText("0")
+    self.rollInfo.setText("0")
     self.yawSlider.setValue(0)
     self.pitchSlider.setValue(0)
     self.rollSlider.setValue(0)
     self.draw() #we redraw the frame
-  
+
+
+  def resetTHSEvent(self):
+    self.meshManager.temperature = self.meshManager.hue = 0
+    self.meshManager.saturation = 1.
+    self.temperatureInfo.setText("0")
+    self.hueInfo.setText("0")
+    self.saturationInfo.setText("1")
+    self.temperatureSlider.setValue(0)
+    self.hueSlider.setValue(0)
+    self.saturationSlider.setValue(100)
+    self.draw() #we redraw the frame
+
+
+  def resetBCEvent(self):
+    self.meshManager.brightness = self.meshManager.contrast = 0
+    self.brightnessInfo.setText("0")
+    self.contrastInfo.setText("0")
+    self.brightnessSlider.setValue(0)
+    self.contrastSlider.setValue(0)
+    self.draw() #we redraw the frame
+
   
   def sliderChanged(self):
     """ Event call at each videoSlider changements. Set the new frame """
@@ -193,25 +222,60 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
 
 
   def yawChanged(self):
-    """ Event call at each fovySlider changements. Change the fovy and redraw the frame """
+    """ Event call at each yawSlider changements. Change the fovy and redraw the frame """
     self.meshManager.rz = self.yawSlider.value()
     self.yawInfo.setText(str(self.meshManager.rz))
     self.draw() #we redraw the frame
 
 
   def pitchChanged(self):
-    """ Event call at each fovySlider changements. Change the fovy and redraw the frame """
+    """ Event call at each pitchSlider changements. Change the fovy and redraw the frame """
     self.meshManager.rx = self.pitchSlider.value()
     self.pitchInfo.setText(str(self.meshManager.rx))
     self.draw() #we redraw the frame
 
 
   def rollChanged(self):
-    """ Event call at each fovySlider changements. Change the fovy and redraw the frame """
+    """ Event call at each rollSlider changements. Change the fovy and redraw the frame """
     self.meshManager.ry = self.rollSlider.value()
     self.rollInfo.setText(str(self.meshManager.ry))
     self.draw() #we redraw the frame
     
+    
+  def temperatureChanged(self):
+    """ Event call at each temperatureSlider changements. Change the fovy and redraw the frame """
+    self.meshManager.temperature = self.temperatureSlider.value()
+    self.temperatureInfo.setText(str(self.meshManager.temperature))
+    self.draw() #we redraw the frame
+    
+    
+  def saturationChanged(self):
+    """ Event call at each saturationSlider changements. Change the fovy and redraw the frame """
+    self.meshManager.saturation = self.saturationSlider.value()
+    self.saturationInfo.setText(str(self.meshManager.saturation))
+    self.draw() #we redraw the frame
+
+
+  def hueChanged(self):
+    """ Event call at each hueSlider changements. Change the fovy and redraw the frame """
+    self.meshManager.hue = self.hueSlider.value()
+    self.hueInfo.setText(str(self.meshManager.hue))
+    self.draw() #we redraw the frame
+
+
+  def brightnessChanged(self):
+    """ Event call at each brightnessSlider changements. Change the fovy and redraw the frame """
+    self.meshManager.brightness = self.brightnessSlider.value()
+    self.brightnessInfo.setText(str(self.meshManager.brightness))
+    self.draw() #we redraw the frame
+
+
+  def contrastChanged(self):
+    """ Event call at each contrastSlider changements. Change the fovy and redraw the frame """
+    self.meshManager.contrast = self.contrastSlider.value()
+    self.contrastInfo.setText(str(self.meshManager.contrast))
+    self.draw() #we redraw the frame
+      
       
   def screenshotEvent(self):
     """ Event call at each click on screenshot_PB. Opens a save selection window and save the screenshot. """
