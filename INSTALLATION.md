@@ -29,6 +29,7 @@ Then, to configure it and use pip, refer to these [instructions](https://github.
 
 
 
+
 ## Python Librairies
 
 ### Numpy
@@ -123,6 +124,7 @@ pip install PyWavefront
 
 
 
+
 ## **GPU** installation (you must have an NVIDIA graphics card)
 
 
@@ -165,12 +167,13 @@ cd ..
 python setup.py install --yes USE_AVX_INSTRUCTIONS --yes DLIB_USE_CUDA
 ```
 
-For windows, you have to install and use Visual Studio in 64 bit. Exemple for `Visual Studio 15 2017` (put your Visual Studio version instead, with ìWin64î)
+For windows, you have to install and use Visual Studio in 64 bit. Exemple for `Visual Studio 15 2017` (put your Visual Studio version instead, with ‚ÄúWin64‚Äù)
 ```
 cmake -G "Visual Studio 15 2017 Win64" -T host=x64 .. -DDLIB_USE_CUDA=1 -DUSE_AVX_INSTRUCTIONS=1
 ```
 
 Check during the installation that dlib can locate and use CUDA and cuDNN. Otherwise read the error messages to fix the problem and recompile.
+
 
 
 
