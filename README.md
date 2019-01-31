@@ -34,6 +34,8 @@ You can configure the application from the json file `config.json`
 * OpenCV 3.0 or higher
 * PyTorch 1.0 or higher
 * PyQT 5.0 or higher
+* Pyglet 1.3.2 or higher
+* PyWavefront 1.0.3 or higher
 * DLIB
 * Skimage
 * Matplotlib
@@ -51,7 +53,7 @@ To play videos with opencv, you must have some codec installed on your computer,
 * gstreamer-player
 
 ### Installing dependencies
-Comming soon...
+If you need help or advice to install the dependencies look at the file [INSTALLATION.md](./INSTALLATION.md)
 
 *Nicolas SENECAL*, *Tom SAMAILLE*, *Florian TORRES*, *Guillaume NICOLUSSI CASTELLAN*, *Paul CHAPELON* 
 
