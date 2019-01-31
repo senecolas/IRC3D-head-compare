@@ -180,13 +180,13 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
 
   def resetTHSEvent(self):
     self.meshManager.temperature = self.meshManager.hue = 0
-    self.meshManager.saturation = 1.
+    self.meshManager.saturation = 1
     self.temperatureInfo.setText("0")
     self.hueInfo.setText("0")
     self.saturationInfo.setText("1")
     self.temperatureSlider.setValue(0)
     self.hueSlider.setValue(0)
-    self.saturationSlider.setValue(100)
+    self.saturationSlider.setValue(1)
     self.draw() #we redraw the frame
 
 
