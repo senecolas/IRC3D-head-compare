@@ -168,15 +168,15 @@ class MeshManager():
 
   def applyHue(self, input_img, hueshift = 0):
     hsvImg = cv2.cvtColor(input_img,cv2.COLOR_RGB2HSV)
-    if hueshift >= 0:
-      hsvImg[...,0] += hueshift
-    else:
-      hsvImg[...,0] -= abs(hueshift)
+    # if hueshift >= 0:
+    #   hsvImg[...,0] += hueshift
+    # else:
+    #   hsvImg[...,0] -= abs(hueshift)
     return cv2.cvtColor(hsvImg,cv2.COLOR_HSV2RGB)
 
   def applySaturation(self, input_img, sat_factor = 1):
     hsvImg = cv2.cvtColor(input_img,cv2.COLOR_RGB2HSV)
-    hsvImg[...,1] *= sat_factor
+    # hsvImg[...,1] *= 2
     return cv2.cvtColor(hsvImg,cv2.COLOR_HSV2RGB)
 
   def applytemperature(self, input_img, temperature = 0):
