@@ -268,7 +268,7 @@ class VideoManager():
   #################################
   ### ====     DRAWING     ==== ###
   #################################
-  
+
   def frame(self, ifDrawAxis=None, ifDrawSquare=None):
     """ 
     Get the current frame in QPixmap format for drawing on the screen (the current frame must be initialized before)

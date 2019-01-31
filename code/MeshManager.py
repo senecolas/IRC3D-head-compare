@@ -36,6 +36,11 @@ class MeshManager():
     self.rx = 0
     self.ry = 0
     self.rz = 0
+    self.brightness = 0
+    self.contrast = 0
+    self.hue = 0
+    self.saturation = 1
+    self.temperature = 0
 
     if meshPath != "":
       self.load(meshPath) 
@@ -114,46 +119,22 @@ class MeshManager():
 
     rgbImage = pyglet.image.get_buffer_manager().get_color_buffer()
 
+    # Convert to OpenCV Image
     size = rgbImage.get_image_data().width, rgbImage.get_image_data().height
     pilImage = Image.frombuffer('RGBA', size, rgbImage.get_image_data().data, 'raw', 'RGBA', 0, 1)
-
     open_cv_image = cv2.cvtColor(np.array(pilImage), cv2.COLOR_RGBA2RGB)
+    open_cv_image = cv2.flip(open_cv_image, 0)
 
-    open_cv_image = cv2.flip(open_cv_image, 0);
-
-    """ Saturation
-    hsvImg = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
-
-    #multiple by a factor to change the saturation
-    hsvImg[...,1] = hsvImg[...,1]*1
-
-    rgbImage = cv2.cvtColor(hsvImg,cv2.COLOR_HSV2RGB)
-    """
-
-    """ Hue 
-    hsvImg = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
-
-    # Adding hueshift to change hue
-    print(hsvImg[...,0])
-    hsvImg[...,0] += 50
-    
-    rgbImage = cv2.cvtColor(hsvImg,cv2.COLOR_HSV2RGB)
-    """
-    
+    """ Filters """
+    # Saturation
+    open_cv_image = self.applySaturation(open_cv_image, self.saturation)
+    # Hue
+    open_cv_image = self.applyHue(open_cv_image, self.hue)
     # Brightness / contrast
-    #rgbImage = self.applyBrightnessContrast(rgbImage, 64, 64)
-
-    """ Temperature
-    labImg = cv2.cvtColor(frame,cv2.COLOR_BGR2LAB)
-
-    # add a coeff to increase temperature
-    temperature = 50
-    labImg[...,2] -= temperature
-
-    rgbImage = cv2.cvtColor(labImg,cv2.COLOR_LAB2RGB)
-    """
+    open_cv_image = self.applyBrightnessContrast(open_cv_image, self.brightness, self.contrast)
+    # Temperature
+    open_cv_image = self.applytemperature(open_cv_image, self.temperature)
     
-
     return open_cv_image
       
 
@@ -186,10 +167,25 @@ class MeshManager():
     return buf
 
   def applyHue(self, input_img, hueshift = 0):
-    input_img[...,0] += hueshift
+    hsvImg = cv2.cvtColor(input_img,cv2.COLOR_RGB2HSV)
+    if hueshift >= 0:
+      hsvImg[...,0] += hueshift
+    else:
+      hsvImg[...,0] -= abs(hueshift)
+    return cv2.cvtColor(hsvImg,cv2.COLOR_HSV2RGB)
 
   def applySaturation(self, input_img, sat_factor = 1):
-    input_img[...,1] *= sat_factor
+    hsvImg = cv2.cvtColor(input_img,cv2.COLOR_RGB2HSV)
+    hsvImg[...,1] *= sat_factor
+    return cv2.cvtColor(hsvImg,cv2.COLOR_HSV2RGB)
+
+  def applytemperature(self, input_img, temperature = 0):
+    labImg = cv2.cvtColor(input_img,cv2.COLOR_RGB2LAB)
+    if temperature >= 0:
+      labImg[...,2] += temperature
+    else :
+      labImg[...,2] -= abs(temperature)
+    return cv2.cvtColor(labImg,cv2.COLOR_LAB2RGB)
 
   def drawMesh(self, yaw, pitch, roll, mesh_number, nb_meshes):
     if self.mesh != None:
