@@ -269,6 +269,37 @@ class VideoManager():
   ### ====     DRAWING     ==== ###
   #################################
 
+  def applyBrightnessContrast(self, input_img, brightness = 0, contrast = 0):
+
+      if brightness != 0:
+          if brightness > 0:
+              shadow = brightness
+              highlight = 255
+          else:
+              shadow = 0
+              highlight = 255 + brightness
+          alpha_b = (highlight - shadow)/255
+          gamma_b = shadow
+
+          buf = cv2.addWeighted(input_img, alpha_b, input_img, 0, gamma_b)
+      else:
+          buf = input_img.copy()
+
+      if contrast != 0:
+          f = 131*(contrast + 127)/(127*(131-contrast))
+          alpha_c = f
+          gamma_c = 127*(1-f)
+
+          buf = cv2.addWeighted(buf, alpha_c, buf, 0, gamma_c)
+
+      return buf
+
+  def applyHue(self, input_img, hueshift = 0):
+    input_img[...,0] += hueshift
+
+  def applySaturation(self, input_img, sat_factor = 1):
+    input_img[...,1] *= sat_factor
+
   def frame(self, ifDrawAxis=None, ifDrawSquare=None):
     """ 
     Get the current frame in QPixmap format for drawing on the screen (the current frame must be initialized before)
@@ -290,9 +321,42 @@ class VideoManager():
     # add square
     if ifDrawSquare or (self.ifDrawSquare and ifDrawSquare == None):
       frame = self.drawSquare(frame)
+
+    rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    """ Saturation
+    hsvImg = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
+
+    #multiple by a factor to change the saturation
+    hsvImg[...,1] = hsvImg[...,1]*1
+
+    rgbImage = cv2.cvtColor(hsvImg,cv2.COLOR_HSV2RGB)
+    """
+
+    """ Hue 
+    hsvImg = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
+
+    # Adding hueshift to change hue
+    print(hsvImg[...,0])
+    hsvImg[...,0] += 50
+  
+    rgbImage = cv2.cvtColor(hsvImg,cv2.COLOR_HSV2RGB)
+    """
+ 
+    # Brightness / contrast
+    #rgbImage = self.applyBrightnessContrast(rgbImage, 64, 64)
+
+    """ Temperature
+    labImg = cv2.cvtColor(frame,cv2.COLOR_BGR2LAB)
+
+    # add a coeff to increase temperature
+    temperature = 50
+    labImg[...,2] -= temperature
+
+    rgbImage = cv2.cvtColor(labImg,cv2.COLOR_LAB2RGB)
+    """
     
     # convert cv2 video to QPixmap
-    rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     convertToQtFormat = QtGui.QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0], QtGui.QImage.Format_RGB888)
     convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
     pixmap = QtGui.QPixmap(convertToQtFormat)

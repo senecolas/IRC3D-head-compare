@@ -17,6 +17,8 @@ from pywavefront import visualization
 from pywavefront import Wavefront
 from pyglet.gl.gl_info import GLInfo
 
+from PIL import Image
+
 class MeshManager():
   def __init__(self, meshPath=""):
     """
@@ -110,6 +112,14 @@ class MeshManager():
     # pyglet.image.get_buffer_manager().get_color_buffer().save('screenshot.png')
 
     rgbImage = pyglet.image.get_buffer_manager().get_color_buffer()
+
+    size = rgbImage.get_image_data().width, rgbImage.get_image_data().height
+
+    print(size)
+
+    pilImage = Image.frombuffer('RGBA', size, rgbImage.get_image_data().data, 'raw')
+
+    pilImage.save("test.png", "PNG")
 
     # Convert ColorBuffer to Pixmap
     convertToQtFormat = QtGui.QImage(rgbImage.get_image_data().data, rgbImage.get_image_data().width, rgbImage.get_image_data().height, QtGui.QImage.Format_RGBA8888_Premultiplied)
