@@ -15,12 +15,13 @@ from ui import main
 import utils
 from utils import debounce
 
-# python3 main.py --video ../videos/CCTV_1.mp4
+# python3 main.py --video ../videos/CCTV_1.mp4 --mesh ../faces/PAUL/FinalExport.obj
 
 def parse_args():
   """Parse input arguments."""
   parser = argparse.ArgumentParser(description='Head pose estimation using the Hopenet network.')
   parser.add_argument('--video', dest='video_path', help='Path of video', default='')
+  parser.add_argument('--mesh', dest='mesh_path', help='Path of mesh', default='../config.json')
   parser.add_argument('--config', dest='config_path', help='Path of the configuraiton JSON file', default='../config.json')
   args = parser.parse_args()
   return args
@@ -511,8 +512,15 @@ class MainWindow(main.Ui_MainWindow, QtWidgets.QMainWindow):
     self.updateInfo()
     
     
-  def drawOn(self, pixmap, widget):
+  def drawOn(self, cv_image, widget):
     """ Draw the 'pixmap' on the QGraphicsView 'widget' by applying the zoom and the displacements """
+    
+
+    # Convert cv_image to QT format
+    convertToQtFormat = QtGui.QImage(cv_image.data, cv_image.shape[1], cv_image.shape[0], QtGui.QImage.Format_RGB888)
+    convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
+    pixmap = QtGui.QPixmap(convertToQtFormat)
+
     # Resize with zoom
     pixmap = pixmap.scaled(self.maxWidth * self.zoom, self.maxHeight * self.zoom, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
     
@@ -613,6 +621,9 @@ if __name__ == '__main__':
   window.show()
 
   window.load(args.config_path)
+
+  if(args.mesh_path != ""): 
+    window.loadModel(args.mesh_path);
   
   if(args.video_path != ""): 
     window.loadVideo(args.video_path);

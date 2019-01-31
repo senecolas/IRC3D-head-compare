@@ -18,6 +18,7 @@ from pywavefront import Wavefront
 from pyglet.gl.gl_info import GLInfo
 
 from PIL import Image
+import numpy as np
 
 class MeshManager():
   def __init__(self, meshPath=""):
@@ -37,7 +38,7 @@ class MeshManager():
     self.rz = 0
 
     if meshPath != "":
-      self.load(meshPath)
+      self.load(meshPath) 
 
   #################################
   ### ====     LOADING     ==== ###
@@ -114,31 +115,81 @@ class MeshManager():
     rgbImage = pyglet.image.get_buffer_manager().get_color_buffer()
 
     size = rgbImage.get_image_data().width, rgbImage.get_image_data().height
+    pilImage = Image.frombuffer('RGBA', size, rgbImage.get_image_data().data, 'raw', 'RGBA', 0, 1)
 
-    print(size)
+    open_cv_image = cv2.cvtColor(np.array(pilImage), cv2.COLOR_RGBA2RGB)
 
-    pilImage = Image.frombuffer('RGBA', size, rgbImage.get_image_data().data, 'raw')
+    open_cv_image = cv2.flip(open_cv_image, 0);
 
-    pilImage.save("test.png", "PNG")
+    """ Saturation
+    hsvImg = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
 
-    # Convert ColorBuffer to Pixmap
-    convertToQtFormat = QtGui.QImage(rgbImage.get_image_data().data, rgbImage.get_image_data().width, rgbImage.get_image_data().height, QtGui.QImage.Format_RGBA8888_Premultiplied)
-    # convertToQtFormat.save('qImage_screenshot.png')
-    convertToQtFormat = QtGui.QPixmap.fromImage(convertToQtFormat)
+    #multiple by a factor to change the saturation
+    hsvImg[...,1] = hsvImg[...,1]*1
 
-    pixmap = QtGui.QPixmap(convertToQtFormat)
+    rgbImage = cv2.cvtColor(hsvImg,cv2.COLOR_HSV2RGB)
+    """
 
-    # Mirror the pixmap (because of an gorizontal "mirror effect" during convert)
-    sm = QtGui.QTransform()
-    sm.scale(1, -1)
-    pixmap = pixmap.transformed(sm)
+    """ Hue 
+    hsvImg = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
 
-    return pixmap
+    # Adding hueshift to change hue
+    print(hsvImg[...,0])
+    hsvImg[...,0] += 50
+    
+    rgbImage = cv2.cvtColor(hsvImg,cv2.COLOR_HSV2RGB)
+    """
+    
+    # Brightness / contrast
+    #rgbImage = self.applyBrightnessContrast(rgbImage, 64, 64)
+
+    """ Temperature
+    labImg = cv2.cvtColor(frame,cv2.COLOR_BGR2LAB)
+
+    # add a coeff to increase temperature
+    temperature = 50
+    labImg[...,2] -= temperature
+
+    rgbImage = cv2.cvtColor(labImg,cv2.COLOR_LAB2RGB)
+    """
+    
+
+    return open_cv_image
       
 
   #################################
   ### ====     DRAWING     ==== ###
   #################################
+
+  def applyBrightnessContrast(self, input_img, brightness = 0, contrast = 0):
+    if brightness != 0:
+        if brightness > 0:
+            shadow = brightness
+            highlight = 255
+        else:
+            shadow = 0
+            highlight = 255 + brightness
+        alpha_b = (highlight - shadow)/255
+        gamma_b = shadow
+
+        buf = cv2.addWeighted(input_img, alpha_b, input_img, 0, gamma_b)
+    else:
+        buf = input_img.copy()
+
+    if contrast != 0:
+        f = 131*(contrast + 127)/(127*(131-contrast))
+        alpha_c = f
+        gamma_c = 127*(1-f)
+
+        buf = cv2.addWeighted(buf, alpha_c, buf, 0, gamma_c)
+
+    return buf
+
+  def applyHue(self, input_img, hueshift = 0):
+    input_img[...,0] += hueshift
+
+  def applySaturation(self, input_img, sat_factor = 1):
+    input_img[...,1] *= sat_factor
 
   def drawMesh(self, yaw, pitch, roll, mesh_number, nb_meshes):
     if self.mesh != None:
