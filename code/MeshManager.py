@@ -20,6 +20,8 @@ from pyglet.gl.gl_info import GLInfo
 from PIL import Image
 import numpy as np
 
+from BoundingBox import BoundingBox
+
 class MeshManager():
   def __init__(self, meshPath=""):
     """
@@ -41,6 +43,7 @@ class MeshManager():
     self.hue = 0
     self.saturation = 1
     self.temperature = 0
+    self.boundingBox = BoundingBox()
 
     if meshPath != "":
       self.load(meshPath) 
@@ -51,6 +54,7 @@ class MeshManager():
 
   def load(self, filename):
     self.mesh = Wavefront(filename)
+    self.setBoundingBox(filename)
     
   def initGL(self):
     self.isModelLoaded = True
@@ -168,16 +172,20 @@ class MeshManager():
 
   def applyHue(self, input_img, hueshift = 0):
     hsvImg = cv2.cvtColor(input_img,cv2.COLOR_RGB2HSV)
-    # if hueshift >= 0:
-    #   hsvImg[...,0] += hueshift
-    # else:
-    #   hsvImg[...,0] -= abs(hueshift)
+    if hueshift >= 0:
+      hsvImg[...,0] += hueshift
+    else:
+      hsvImg[...,0] -= abs(hueshift)
     return cv2.cvtColor(hsvImg,cv2.COLOR_HSV2RGB)
 
   def applySaturation(self, input_img, sat_factor = 1):
-    hsvImg = cv2.cvtColor(input_img,cv2.COLOR_RGB2HSV)
-    # hsvImg[...,1] *= 2
-    return cv2.cvtColor(hsvImg,cv2.COLOR_HSV2RGB)
+    # hsvImg = cv2.cvtColor(input_img,cv2.COLOR_RGB2HSV)
+    # # hsvImg[...,1] *= 2
+    # h, s, v = cv2.split(hsvImg)
+    # hsvImg = cv2.merge([h, s, v])
+    # return cv2.cvtColor(hsvImg,cv2.COLOR_HSV2RGB)
+    # input_img.convertTo(input_img, CV_32F, 1.0/255, 0)
+    return input_img
 
   def applytemperature(self, input_img, temperature = 0):
     labImg = cv2.cvtColor(input_img,cv2.COLOR_RGB2LAB)
@@ -194,7 +202,7 @@ class MeshManager():
 
       # Transforms : comparisons between face bounding boxes( on the video) and the bounding box of the face on OpenGL render --> y position : we move the mesh back until bounding boxes are "almost even"
       # then we move the mesh on x and z axes to make the bounding box at the same pos
-      # BUT --> this involve a bounding box on the pixmap frame wich follow the face
+      # BUT --> this involve a bounding box on the pixmap frame which follow the face
 
       # Reset previous matrix transformations
       glLoadIdentity()
@@ -208,3 +216,22 @@ class MeshManager():
       visualization.draw(self.mesh)
     else:
       print ("No mesh loaded : can't draw the mesh")
+
+  def setBoundingBox(self, filename):
+    minX = maxX = minY = maxY = minZ = maxZ = 0
+    for line in open(filename, "r"):
+      values = line.split()
+      if (not(values[0] == "v")): continue
+      if ((float)(values[1]) > maxX):
+        maxX = (float)(values[1])
+      if ((float)(values[1]) < minX):
+        minX = (float)(values[1])
+      if ((float)(values[2]) > maxY):
+        maxY = (float)(values[2])
+      if ((float)(values[2]) < minY):
+        minY = (float)(values[2])
+      if ((float)(values[3]) > maxZ):
+        maxZ = (float)(values[3])
+      if ((float)(values[3]) < minZ):
+        minZ = (float)(values[3])
+      self.boundingBox.setVertexes(minX, maxX, minY, maxY, minZ, maxZ)
